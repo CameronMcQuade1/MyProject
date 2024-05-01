@@ -30,4 +30,3 @@ class ShowMessage:
     @staticmethod
     def ask_retry(message):
         messagebox.askretrycancel(message)
-

@@ -31,5 +31,3 @@ class ShowMessage:
     def ask_retry(message):
         messagebox.askretrycancel(message)
 
-
-

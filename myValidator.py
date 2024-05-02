@@ -39,3 +39,19 @@ class Validator:
                 return True
             else:
                 return False
+
+    @staticmethod
+    def presence_checker(info, choice):
+        # Choice 1: check if data is there when it is supposed to be
+        # Choice 2: check if data is there when it is not supposed to be
+        if choice == 1:
+            info = info.replace(" ", "")
+            if info == "":
+                return True
+            else:
+                return False
+        if choice == 2:
+            if info != "":
+                return True
+            else:
+                return False

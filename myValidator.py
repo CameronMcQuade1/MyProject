@@ -55,3 +55,12 @@ class Validator:
                 return True
             else:
                 return False
+
+    @staticmethod
+    def data_type_checker(info, supposed_type, choice):
+        # Choice 1: Check if the data is the type it is supposed to be
+        if choice == 1:
+            if isinstance(info, supposed_type):
+                return True
+            else:
+                return False

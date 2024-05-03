@@ -33,7 +33,6 @@ class Validator:
     @staticmethod
     def format_checker(info, choice):
         # Choice 1: check if info is in email format
-        # Choice 2: pass#
         if choice == 1:
             email_format = re.compile(r"^[A-Za-z\d]+(?:\.[A-Za-z\d]+)*@[A-Za-z\d]+(?:\.[A-Za-z\d]+)*$")
             if re.fullmatch(email_format, info):  # Check if the info entered matches the email format

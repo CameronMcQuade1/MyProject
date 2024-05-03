@@ -4,8 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4223b0cb-600c-4d4d-bb0c-1363f4ef671e" name="Changes" comment="created password strength checker in validator">
-      <change beforePath="$PROJECT_DIR$/ProjectTester.py" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectTester.py" afterDir="false" />
+    <list default="true" id="4223b0cb-600c-4d4d-bb0c-1363f4ef671e" name="Changes" comment="updated project tester">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -141,7 +141,15 @@
       <option name="project" value="LOCAL" />
       <updated>1714746981987</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="updated project tester">
+      <option name="closed" value="true" />
+      <created>1714748151082</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1714748151082</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -176,6 +184,7 @@
     <MESSAGE value="updated code, created myCustomMessages.py using CTk" />
     <MESSAGE value="updated validator" />
     <MESSAGE value="created password strength checker in validator" />
-    <option name="LAST_COMMIT_MESSAGE" value="created password strength checker in validator" />
+    <MESSAGE value="updated project tester" />
+    <option name="LAST_COMMIT_MESSAGE" value="updated project tester" />
   </component>
 </project>

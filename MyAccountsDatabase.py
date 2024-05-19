@@ -1,4 +1,5 @@
 import sqlite3
+import uuid
 
 
 class AccountsDatabase:
@@ -22,14 +23,21 @@ class AccountsDatabase:
 
     def check_accounts_amount(self):
         try:
-            return self.cursor.execute("""SELECT COUNT(*) FROM Accounts""").fetchone()[0]
+            __num_of_accounts = self.cursor.execute("""SELECT COUNT(*) FROM Accounts""").fetchone()[0]
         except sqlite3.Error as e:
             return e
 
     def create_root_account(self):
-        self.cursor.execute("""INSERT INTO""")
+        try:
+            __root_password = self.create_root_password()
+            self.cursor.execute("""INSERT INTO Accounts (AccountID, Password, StaffLevel)
+             VALUES ('AdminRoot', ?, 1)""", (__root_password,))
+            self.connector.commit()
+            return __root_password
+        except sqlite3.Error as e:
+            return e
 
-
-if __name__ == "__main__":
-    test_database = AccountsDatabase()
-    print(test_database.check_accounts_amount())
+    @staticmethod
+    def create_root_password():
+        __password = uuid.uuid4().hex
+        return __password

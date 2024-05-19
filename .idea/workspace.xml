@@ -4,9 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4223b0cb-600c-4d4d-bb0c-1363f4ef671e" name="Changes" comment="updated project tester">
-      <change afterPath="$PROJECT_DIR$/MyAccountsDatabase.py" afterDir="false" />
+    <list default="true" id="4223b0cb-600c-4d4d-bb0c-1363f4ef671e" name="Changes" comment="saving current changes, and starting MyAccountsDatabase.py">
+      <change afterPath="$PROJECT_DIR$/LoginScreen.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MyAccountsDatabase.py" beforeDir="false" afterPath="$PROJECT_DIR$/MyAccountsDatabase.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MyMessageBoxes.py" beforeDir="false" afterPath="$PROJECT_DIR$/MyMessageBoxes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,6 +56,7 @@
   "keyToString": {
     "ASKED_ADD_EXTERNAL_FILES": "true",
     "Python tests.Python tests in ProjectTester.py.executor": "Run",
+    "Python.LoginScreen.executor": "Run",
     "Python.MyAccountsDatabase.executor": "Run",
     "Python.MyMessageBoxes.executor": "Run",
     "Python.main.executor": "Run",
@@ -60,7 +65,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
-    "settings.editor.selected.configurable": "preferences.pluginManager"
+    "settings.editor.selected.configurable": "preferences.fileTypes"
   }
 }]]></component>
   <component name="SharedIndexes">
@@ -151,7 +156,15 @@
       <option name="project" value="LOCAL" />
       <updated>1714748151082</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="saving current changes, and starting MyAccountsDatabase.py">
+      <option name="closed" value="true" />
+      <created>1715950964143</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1715950964143</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -190,6 +203,7 @@
     <MESSAGE value="updated validator" />
     <MESSAGE value="created password strength checker in validator" />
     <MESSAGE value="updated project tester" />
-    <option name="LAST_COMMIT_MESSAGE" value="updated project tester" />
+    <MESSAGE value="saving current changes, and starting MyAccountsDatabase.py" />
+    <option name="LAST_COMMIT_MESSAGE" value="saving current changes, and starting MyAccountsDatabase.py" />
   </component>
 </project>

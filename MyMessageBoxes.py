@@ -5,7 +5,7 @@ class ShowMessage:
 
     @staticmethod
     def show_info(message):
-        messagebox.showinfo(message)
+        messagebox.showinfo(title='Info:', message=message)
 
     @staticmethod
     def show_warning(message):

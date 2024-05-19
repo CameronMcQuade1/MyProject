@@ -1,3 +1,1 @@
 import MyAccountsDatabase
-
-print(MyAccountsDatabase.test_database)

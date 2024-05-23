@@ -4,10 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4223b0cb-600c-4d4d-bb0c-1363f4ef671e" name="Changes" comment="saving current changes, and starting MyAccountsDatabase.py">
-      <change afterPath="$PROJECT_DIR$/icons8-show-password-50.png" afterDir="false" />
+    <list default="true" id="4223b0cb-600c-4d4d-bb0c-1363f4ef671e" name="Changes" comment="saving current changes">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/LoginScreen.py" beforeDir="false" afterPath="$PROJECT_DIR$/LoginScreen.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -195,7 +195,23 @@
       <option name="project" value="LOCAL" />
       <updated>1715950964143</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="saving current changes">
+      <option name="closed" value="true" />
+      <created>1716380432772</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1716380432772</updated>
+    </task>
+    <task id="LOCAL-00012" summary="saving current changes">
+      <option name="closed" value="true" />
+      <created>1716380443292</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1716380443292</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -235,6 +251,7 @@
     <MESSAGE value="created password strength checker in validator" />
     <MESSAGE value="updated project tester" />
     <MESSAGE value="saving current changes, and starting MyAccountsDatabase.py" />
-    <option name="LAST_COMMIT_MESSAGE" value="saving current changes, and starting MyAccountsDatabase.py" />
+    <MESSAGE value="saving current changes" />
+    <option name="LAST_COMMIT_MESSAGE" value="saving current changes" />
   </component>
 </project>

@@ -1,5 +1,5 @@
 import unittest
-import myValidator
+import MyValidator
 
 
 class MyTestCase(unittest.TestCase):

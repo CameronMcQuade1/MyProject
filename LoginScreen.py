@@ -3,14 +3,31 @@ from tkinter import font
 import MyMessageBoxes
 
 
+class StarterUI:
+    def __init__(self, parent):
+        self.parent = parent
+        self.starting_frame = tk.Frame(parent, width=parent.winfo_width(), height=parent.winfo_height())
+        self.show_options()
+        self.starting_frame.place(anchor="center", relx=.5, rely=.2)
+
+    def show_options(self):
+        options_menu = tk.Frame(self.starting_frame)
+        login_button = tk.Button(options_menu, text="LOGIN", command=self.goto_login)
+        login_button.grid(row=0, column=0)
+        options_menu.pack(fill=tk.BOTH, expand=True)
+
+    def goto_login(self):
+        self.starting_frame.destroy()
+        MainLogin(self.parent)
+
+
 class MainLogin:
     def __init__(self, parent):
         self.login_screen = tk.Frame(parent)
         self.User = tk.StringVar()
         self.Password = tk.StringVar()
         self.main_frame()
-        self.login_screen.pack()
-
+        self.login_screen.place(anchor="center", relx=.5, rely=.2)
 
     def main_frame(self):
         self.login_frame = tk.Frame(self.login_screen, borderwidth=2, relief='groove')
@@ -18,7 +35,7 @@ class MainLogin:
         self.enter_username = tk.Entry(self.login_frame, textvariable=self.User)
         self.enter_password_label = tk.Label(self.login_frame, text='Password:')
         self.enter_password = tk.Entry(self.login_frame, textvariable=self.Password, show='*')
-        self.show_password = tk.Button(self.login_frame, text="👁")
+        self.show_password = tk.Button(self.login_frame, text="👁", width=2, height=1)
         self.show_password['font'] = font.Font(size=11)
         self.enter_user_label.grid(row=0, column=0)
         self.enter_username.grid(row=1, column=0)
@@ -28,7 +45,7 @@ class MainLogin:
         self.show_password.bind('<ButtonPress-1>', lambda event: self.show_hide_password())
         self.show_password.bind('<ButtonRelease-1>', lambda event: self.show_hide_password())
 
-        self.login_frame.pack()
+        self.login_frame.pack(fill=tk.BOTH, expand=True)
 
     def show_hide_password(self):
         if self.enter_password.cget('show') == '':
@@ -41,18 +58,15 @@ class MainLogin:
         faq_screen = tk.Toplevel(background='grey')
         faq_screen.title("FAQ:")
         faq_frame = tk.Frame(faq_screen)
-        questions_and_answers = tk.Label(faq_frame, text=("𝗪𝗵𝗮𝘁 𝗶𝘀 𝗺𝘆 𝗨𝘀𝗲𝗿𝗻𝗮𝗺𝗲 𝗮𝗻𝗱 𝗣𝗮𝘀𝘀𝘄𝗼𝗿𝗱:"
+        questions_and_answers = tk.Label(faq_frame, text=("What is my username and password:"
                                                           "\n- Your Username and Password will be given to you when "
                                                           "your account is first created."
-                                                          "\n𝗪𝗵𝗮𝘁 𝘁𝗼 𝗱𝗼 𝗶𝗳 𝗜'𝘃𝗲 𝗳𝗼𝗿𝗴𝗼𝘁𝘁𝗲𝗻 𝗺𝘆 𝗽𝗮𝘀𝘀𝘄𝗼𝗿𝗱:"
+                                                          "\nWhat to do if I've forgotten my password:"
                                                           "\n- Dont worry! Just click on the 'forgot password' button "
                                                           "and answer some questions to reset it."), relief='ridge',
                                          font=8)
         questions_and_answers.grid(row=0, column=1)
         faq_frame.grid(row=0, column=1)
-        quit_button = tk.Button(faq_screen, text='𝗫', background='Red', command=faq_screen.destroy, height=3)
-        quit_button['font'] = font.Font(size=14)
-        quit_button.grid(row=0, column=0)
         faq_screen.mainloop()
 
     def remove_login_frame(self):
@@ -61,5 +75,6 @@ class MainLogin:
 
 if __name__ == "__main__":
     test_root = tk.Tk()
-    login_frame = MainLogin(test_root)
+    starting_frame = StarterUI(test_root)
+    test_root.geometry("1400x700")
     test_root.mainloop()

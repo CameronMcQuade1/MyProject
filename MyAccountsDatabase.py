@@ -1,5 +1,5 @@
 import sqlite3
-import uuid
+import PasswordHasher
 
 
 class AccountsDatabase:
@@ -39,5 +39,5 @@ class AccountsDatabase:
 
     @staticmethod
     def create_root_password():
-        __password = uuid.uuid4().hex
+        __password = PasswordHasher.Hasher().create_random_password()
         return __password

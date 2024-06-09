@@ -10,7 +10,7 @@ class MainApp:
         self.root.title('Expense Tracker')
         self.menu_bar()
         self.run_sequence()
-        self.centre_window(self.root, 600, 200)
+        self.centre_window(self.root, 600, 370)
         self.root.mainloop()
 
     def run_sequence(self):
@@ -36,4 +36,12 @@ class MainApp:
         main_bar.add_cascade(label='Help', menu=help_menu)
 
 
-MainApp()
+def app():
+    main_db = MyAccountsDatabase.AccountsDatabase()
+    main_db.create_root_account()
+    print(main_db.check_accounts_amount())
+    MainApp()
+
+
+if __name__ == '__main__':
+    app()

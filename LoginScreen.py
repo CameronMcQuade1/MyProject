@@ -30,25 +30,49 @@ class MainLogin:
         self.login_screen.place(anchor="center", relx=.5, rely=.2)
 
     def main_frame(self):
-        self.login_frame = tk.Frame(self.login_screen, borderwidth=2, relief='groove')
-        self.enter_user_label = tk.Label(self.login_frame, text='Username:')
-        self.enter_username = tk.Entry(self.login_frame, textvariable=self.User)
-        self.enter_password_label = tk.Label(self.login_frame, text='Password:')
-        self.enter_password = tk.Entry(self.login_frame, textvariable=self.Password, show='*')
+        # Main login frame
+        self.login_frame = tk.Frame(self.login_screen, borderwidth=3, relief='groove')
+        # Entry boxes and placeholder text
+        self.enter_username = tk.Entry(self.login_frame, textvariable=self.User, fg='grey')
+        self.enter_password = tk.Entry(self.login_frame, textvariable=self.Password, fg='grey', show='')
+        self.enter_username.insert(0, 'Username')
+        self.enter_password.insert(0, 'Password')
+        # View password
         self.show_password = tk.Button(self.login_frame, text="👁", width=2, height=1)
         self.show_password['font'] = font.Font(size=11)
-        self.enter_user_label.grid(row=0, column=0)
-        self.enter_username.grid(row=1, column=0)
-        self.enter_password_label.grid(row=0, column=1)
-        self.enter_password.grid(row=1, column=1)
-        self.show_password.grid(row=1, column=2)
+        # Placing widgets
+        self.enter_username.grid(row=0, column=0)
+        self.enter_password.grid(row=0, column=1)
+        self.show_password.grid(row=0, column=2)
+        # Event binding
         self.show_password.bind('<ButtonPress-1>', lambda event: self.show_hide_password())
         self.show_password.bind('<ButtonRelease-1>', lambda event: self.show_hide_password())
-
+        self.enter_username.bind('<Button-1>', lambda event: self.entry_focused(self.enter_username,
+                                                                                'Username'))
+        self.enter_username.bind('<FocusOut>',
+                                 lambda event: self.entry_unfocused(self.enter_username, 'Username'))
+        self.enter_password.bind('<Button-1>', lambda event: (self.entry_focused(self.enter_password,
+                                                                                 'Password'),
+                                                              self.enter_password.config(show='*')))
+        self.enter_password.bind('<FocusOut>',
+                                 lambda event: self.entry_unfocused(self.enter_password, 'Password'))
         self.login_frame.pack(fill=tk.BOTH, expand=True)
 
+    @staticmethod
+    def entry_focused(target, placeholder):
+        if target.get() == placeholder:
+            target.delete('0', 'end')
+            target['fg'] = 'black'
+
+    @staticmethod
+    def entry_unfocused(target, placeholder):
+        if target.get() == "":
+            target.config(show='')
+            target.insert(0, placeholder)
+            target['fg'] = 'grey'
+
     def show_hide_password(self):
-        if self.enter_password.cget('show') == '':
+        if self.enter_password.cget('show') == '' and self.enter_password['fg'] == 'black':
             self.enter_password.config(show='*')
         else:
             self.enter_password.config(show='')

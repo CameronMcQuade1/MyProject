@@ -39,7 +39,6 @@ class MainApp:
 def app():
     main_db = MyAccountsDatabase.AccountsDatabase()
     main_db.create_root_account()
-    print(main_db.check_accounts_amount())
     MainApp()
 
 

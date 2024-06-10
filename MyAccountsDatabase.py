@@ -24,18 +24,20 @@ class AccountsDatabase:
     def check_accounts_amount(self):
         try:
             __num_of_accounts = self.cursor.execute("""SELECT COUNT(*) FROM Accounts""").fetchone()[0]
+            return __num_of_accounts
         except sqlite3.Error as e:
             return e
 
     def create_root_account(self):
-        try:
-            __root_password = self.create_root_password()
-            self.cursor.execute("""INSERT INTO Accounts (AccountID, Password, StaffLevel)
-             VALUES ('AdminRoot', ?, 1)""", (__root_password,))
-            self.connector.commit()
-            return __root_password
-        except sqlite3.Error as e:
-            return e
+        if self.check_accounts_amount() == 0:
+            try:
+                __root_password = self.create_root_password()
+                self.cursor.execute("""INSERT INTO Accounts (AccountID, Password, StaffLevel)
+                 VALUES ('Root', ?, 1)""", (__root_password,))
+                self.connector.commit()
+                return __root_password
+            except sqlite3.Error as e:
+                return e
 
     @staticmethod
     def create_root_password():

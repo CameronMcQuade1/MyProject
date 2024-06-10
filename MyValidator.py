@@ -39,6 +39,8 @@ class Validator:
                 return True
             else:
                 return False
+        else:  # If the choice cannot be found, return False
+            return False
 
     @staticmethod
     def presence_checker(info, choice):

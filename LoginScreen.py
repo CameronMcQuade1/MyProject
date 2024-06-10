@@ -23,15 +23,16 @@ class StarterUI:
 
 class MainLogin:
     def __init__(self, parent):
+        self.parent = parent
         self.login_screen = tk.Frame(parent)
         self.User = tk.StringVar()
         self.Password = tk.StringVar()
         self.main_frame()
-        self.login_screen.place(anchor="center", relx=.5, rely=.2)
+        self.login_screen.pack(fill=tk.BOTH, expand=True)
 
     def main_frame(self):
         # Main login frame
-        self.login_frame = tk.Frame(self.login_screen, borderwidth=3, relief='groove')
+        self.login_frame = tk.Frame(self.login_screen, borderwidth=2, relief='groove')
         # Entry boxes and placeholder text
         self.enter_username = tk.Entry(self.login_frame, textvariable=self.User, fg='grey')
         self.enter_password = tk.Entry(self.login_frame, textvariable=self.Password, fg='grey', show='')
@@ -56,7 +57,10 @@ class MainLogin:
                                                               self.enter_password.config(show='*')))
         self.enter_password.bind('<FocusOut>',
                                  lambda event: self.entry_unfocused(self.enter_password, 'Password'))
-        self.login_frame.pack(fill=tk.BOTH, expand=True)
+        self.login_screen.bind('<Button-1>', lambda event: self.login_screen.focus_set())
+        self.login_frame.bind('<Button-1>', lambda event: self.login_frame.focus_set())
+
+        self.login_frame.place(anchor='center', relx=0.5, rely=0.2)
 
     @staticmethod
     def entry_focused(target, placeholder):

@@ -5,11 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4223b0cb-600c-4d4d-bb0c-1363f4ef671e" name="Changes" comment="saving current progress">
+      <change afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/sqldialects.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TkEntryPlaceholderText.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/MyProject.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/MyProject.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CreateAccountScreen.py" beforeDir="false" afterPath="$PROJECT_DIR$/CreateAccountScreen.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MyValidator.py" beforeDir="false" afterPath="$PROJECT_DIR$/MyValidator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PasswordHasher.py" beforeDir="false" afterPath="$PROJECT_DIR$/PasswordHasher.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProjectTester.py" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectTester.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LoginScreen.py" beforeDir="false" afterPath="$PROJECT_DIR$/LoginScreen.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,40 +54,47 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;Python tests.Python tests for ProjectTester.MyTestCase.test_myValidation.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests in ProjectTester.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python.CreateAccountScreen.executor&quot;: &quot;Run&quot;,
-    &quot;Python.LoginScreen.executor&quot;: &quot;Run&quot;,
-    &quot;Python.Main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.MyAccountsDatabase.executor&quot;: &quot;Run&quot;,
-    &quot;Python.MyMessageBoxes.executor&quot;: &quot;Run&quot;,
-    &quot;Python.PasswordHasher.executor&quot;: &quot;Run&quot;,
-    &quot;Python.StartingInterface.executor&quot;: &quot;Run&quot;,
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.myCustomMessages.executor&quot;: &quot;Run&quot;,
-    &quot;Python.myValidator.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/camer/PycharmProjects/MyProject&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.keymap&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "Python tests.Python tests for ProjectTester.MyTestCase.test_myValidation.executor": "Run",
+    "Python tests.Python tests in ProjectTester.py.executor": "Run",
+    "Python.CreateAccountScreen.executor": "Run",
+    "Python.LoginScreen.executor": "Run",
+    "Python.Main.executor": "Run",
+    "Python.MyAccountsDatabase.executor": "Run",
+    "Python.MyMessageBoxes.executor": "Run",
+    "Python.PasswordHasher.executor": "Run",
+    "Python.StartingInterface.executor": "Run",
+    "Python.TkEntryPlaceholderText.executor": "Run",
+    "Python.main.executor": "Run",
+    "Python.myCustomMessages.executor": "Run",
+    "Python.myValidator.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/camer/PycharmProjects/MyProject",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.keymap",
+    "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "sqlite"
+    ]
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\camer\PycharmProjects\MyProject" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.CreateAccountScreen">
+  <component name="RunManager">
     <configuration name="CreateAccountScreen" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="MyProject" />
       <option name="ENV_FILES" value="" />
@@ -195,10 +205,10 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.CreateAccountScreen" />
         <item itemvalue="Python tests.Python tests for ProjectTester.MyTestCase.test_myValidation" />
         <item itemvalue="Python.Main" />
         <item itemvalue="Python.PasswordHasher" />
-        <item itemvalue="Python.CreateAccountScreen" />
         <item itemvalue="Python.LoginScreen" />
       </list>
     </recent_temporary>
@@ -228,6 +238,7 @@
       <workItem from="1718012688947" duration="4627000" />
       <workItem from="1718028908058" duration="2491000" />
       <workItem from="1718033347330" duration="286000" />
+      <workItem from="1718120023811" duration="3837000" />
     </task>
     <task id="LOCAL-00001" summary="created my_message_boxes">
       <option name="closed" value="true" />
@@ -406,12 +417,13 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/MyProject$MyAccountsDatabase.coverage" NAME="MyAccountsDatabase Coverage Results" MODIFIED="1717856621425" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/MyProject$CreateAccountScreen.coverage" NAME="CreateAccountScreen Coverage Results" MODIFIED="1718031376188" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/MyProject$Main.coverage" NAME="Main Coverage Results" MODIFIED="1718029381799" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MyProject$CreateAccountScreen.coverage" NAME="CreateAccountScreen Coverage Results" MODIFIED="1718123248939" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MyProject$Main.coverage" NAME="Main Coverage Results" MODIFIED="1718033961686" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MyProject$main.coverage" NAME="main Coverage Results" MODIFIED="1717834806337" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/MyProject$LoginScreen.coverage" NAME="LoginScreen Coverage Results" MODIFIED="1717852085108" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MyProject$LoginScreen.coverage" NAME="LoginScreen Coverage Results" MODIFIED="1718123060295" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MyProject$StartingInterface.coverage" NAME="StartingInterface Coverage Results" MODIFIED="1717833117224" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MyProject$.coverage" NAME=" Coverage Results" MODIFIED="1718014623098" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MyProject$PasswordHasher.coverage" NAME="PasswordHasher Coverage Results" MODIFIED="1718016185521" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MyProject$TkEntryPlaceholderText.coverage" NAME="TkEntryPlaceholderText Coverage Results" MODIFIED="1718122511939" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

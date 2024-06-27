@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import font
 import MyMessageBoxes
-import TkEntryPlaceholderText
+from MyCustomFunctions import EntryPlaceHolderText, ShowHidePassword
 
 
 class StarterUI:
@@ -45,16 +45,12 @@ class MainLogin:
         self.enter_password.grid(row=0, column=1)
         self.show_password.grid(row=0, column=2)
         # Event binding
-        TkEntryPlaceholderText.PlaceHolderText(self.login_screen, self.enter_username, 'Username')
-        TkEntryPlaceholderText.PlaceHolderText(self.login_screen, self.enter_password, 'Password')
-
+        EntryPlaceHolderText(self.login_screen, self.enter_username, 'Username')
+        EntryPlaceHolderText(self.login_screen, self.enter_password, 'Password')
+        self.enter_password.bind('<FocusIn>', lambda event: self.enter_password.config(show='*'))
+        self.show_password.bind('<ButtonPress-1>', lambda event: ShowHidePassword(self.enter_password))
+        self.show_password.bind('<ButtonRelease-1>', lambda event: ShowHidePassword(self.enter_password))
         self.login_frame.place(anchor='center', relx=0.5, rely=0.2)
-
-    def show_hide_password(self):
-        if self.enter_password.cget('show') == '' and self.enter_password['fg'] == 'black':
-            self.enter_password.config(show='*')
-        else:
-            self.enter_password.config(show='')
 
     @staticmethod
     def frequently_asked_questions_gui():

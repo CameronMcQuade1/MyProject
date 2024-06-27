@@ -13,7 +13,7 @@ class StarterUI:
 
     def show_options(self):
         options_menu = tk.Frame(self.starting_frame)
-        login_button = tk.Button(options_menu, text="LOGIN", command=self.goto_login)
+        login_button = tk.Button(options_menu, text="LOGIN", command=self.goto_login, width=20, height=2)
         login_button.grid(row=0, column=0)
         options_menu.pack(fill=tk.BOTH, expand=True)
 
@@ -47,7 +47,7 @@ class MainLogin:
         # Event binding
         EntryPlaceHolderText(self.login_screen, self.enter_username, 'Username')
         EntryPlaceHolderText(self.login_screen, self.enter_password, 'Password')
-        self.enter_password.bind('<FocusIn>', lambda event: self.enter_password.config(show='*'))
+        self.enter_password.bind('<ButtonPress-1>', lambda event: self.enter_password.config(show='*'))
         self.show_password.bind('<ButtonPress-1>', lambda event: ShowHidePassword(self.enter_password))
         self.show_password.bind('<ButtonRelease-1>', lambda event: ShowHidePassword(self.enter_password))
         self.login_frame.place(anchor='center', relx=0.5, rely=0.2)

@@ -2,13 +2,13 @@ class EntryPlaceHolderText:
     def __init__(self, parent, target, text):
         target.insert(0, text)
         parent.bind('<Button-1>', lambda event: parent.focus_set())
-        target.bind('<Button-1>', lambda event: self.entry_focused(target, text))
+        target.bind('<FocusIn>', lambda event: self.entry_focused(target))
         target.bind('<FocusOut>', lambda event: self.entry_unfocused(target, text))
         return
 
     @staticmethod
-    def entry_focused(target, placeholder):
-        if target.get() == placeholder:
+    def entry_focused(target):
+        if target['fg'] == 'grey':
             target.delete('0', 'end')
             target['fg'] = 'black'
 

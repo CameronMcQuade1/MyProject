@@ -10,7 +10,7 @@ class MainApp:
         self.root.title('Expense Tracker')
         self.menu_bar()
         self.run_sequence()
-        self.centre_window(self.root, 600, 370)
+        self.centre_window(self.root, 1000, 620)
         self.root.mainloop()
 
     def run_sequence(self):

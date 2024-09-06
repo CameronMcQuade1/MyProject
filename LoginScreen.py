@@ -4,24 +4,6 @@ import MyMessageBoxes
 from MyCustomFunctions import EntryPlaceHolderText, ShowHidePassword
 
 
-class StarterUI:
-    def __init__(self, parent):
-        self.parent = parent
-        self.starting_frame = tk.Frame(parent, width=parent.winfo_width(), height=parent.winfo_height())
-        self.show_options()
-        self.starting_frame.place(anchor="center", relx=.5, rely=.2)
-
-    def show_options(self):
-        options_menu = tk.Frame(self.starting_frame)
-        login_button = tk.Button(options_menu, text="LOGIN", command=self.goto_login, width=20, height=2)
-        login_button.grid(row=0, column=0)
-        options_menu.pack(fill=tk.BOTH, expand=True)
-
-    def goto_login(self):
-        self.starting_frame.destroy()
-        MainLogin(self.parent)
-
-
 class MainLogin:
     def __init__(self, parent):
         self.parent = parent
@@ -32,25 +14,40 @@ class MainLogin:
         self.login_screen.pack(fill=tk.BOTH, expand=True)
 
     def main_frame(self):
-        # Main login frame
-        self.login_frame = tk.Frame(self.login_screen, borderwidth=2, relief='groove')
+        # Main login frame with larger dimensions
+        self.login_frame = tk.Frame(self.login_screen, borderwidth=2, relief='groove', width=375, height=215)
+        self.login_frame.place(anchor='center', relx=0.5, rely=0.35)
+
         # Entry boxes and placeholder text
-        self.enter_username = tk.Entry(self.login_frame, textvariable=self.User, fg='grey')
-        self.enter_password = tk.Entry(self.login_frame, textvariable=self.Password, fg='grey', show='')
+        self.enter_username = tk.Entry(self.login_frame, textvariable=self.User, fg='grey', width=40)
+        self.enter_password = tk.Entry(self.login_frame, textvariable=self.Password, fg='grey', show='', width=40)
+        self.login_button = tk.Button(self.login_frame, command=self.try_login, text="Login", height=2, width=20)
+        self.forgot_pass = tk.Button(self.login_frame, command=self.new_password, text="Forgot Password",
+                                     height=2, width=20)
+
         # View password
         self.show_password = tk.Button(self.login_frame, text="👁", width=2, height=1)
         self.show_password['font'] = font.Font(size=11)
-        # Placing widgets
-        self.enter_username.grid(row=0, column=0)
-        self.enter_password.grid(row=0, column=1)
-        self.show_password.grid(row=0, column=2)
+
+        # Placing widgets with padding for better spacing
+        self.enter_username.place(relx=0.5, rely=0.2, anchor='center')
+        self.enter_password.place(relx=0.5, rely=0.4, anchor='center')
+        self.show_password.place(relx=0.9, rely=0.4, anchor='center')
+        self.login_button.place(relx=0.5, rely=0.6, anchor='center')
+        self.forgot_pass.place(relx=0.5, rely=0.85, anchor='center')
+
         # Event binding
         EntryPlaceHolderText(self.login_screen, self.enter_username, 'Username')
         EntryPlaceHolderText(self.login_screen, self.enter_password, 'Password')
         self.enter_password.bind('<ButtonPress-1>', lambda event: self.enter_password.config(show='*'))
         self.show_password.bind('<ButtonPress-1>', lambda event: ShowHidePassword(self.enter_password))
         self.show_password.bind('<ButtonRelease-1>', lambda event: ShowHidePassword(self.enter_password))
-        self.login_frame.place(anchor='center', relx=0.5, rely=0.2)
+
+    def try_login(self):
+        pass
+
+    def new_password(self):
+        pass
 
     @staticmethod
     def frequently_asked_questions_gui():
@@ -65,7 +62,7 @@ class MainLogin:
                                                           "and answer some questions to reset it."), relief='ridge',
                                          font=8)
         questions_and_answers.grid(row=0, column=1)
-        faq_frame.grid(row=0, column=1)
+        faq_frame.pack(expand=True, fill=tk.BOTH)
         faq_screen.mainloop()
 
     def remove_login_frame(self):
@@ -74,6 +71,6 @@ class MainLogin:
 
 if __name__ == "__main__":
     test_root = tk.Tk()
-    starting_frame = StarterUI(test_root)
+    starting_frame = MainLogin(test_root)
     test_root.geometry("1400x700")
     test_root.mainloop()

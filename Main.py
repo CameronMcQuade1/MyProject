@@ -1,4 +1,4 @@
-import MyAccountsDatabase
+import MyDatabase
 import MyMessageBoxes
 import LoginScreen
 import tkinter as tk
@@ -14,7 +14,7 @@ class MainApp:
         self.root.mainloop()
 
     def run_sequence(self):
-        LoginScreen.StarterUI(self.root)
+        LoginScreen.MainLogin(self.root)
 
     @staticmethod
     def centre_window(target, width, height):
@@ -37,10 +37,10 @@ class MainApp:
 
 
 def app():
-    main_db = MyAccountsDatabase.AccountsDatabase()
+    main_db = MyDatabase.AccountsDatabase()
     main_db.create_root_account()
     MainApp()
 
 
 if __name__ == '__main__':
-    app()
+    MainApp()

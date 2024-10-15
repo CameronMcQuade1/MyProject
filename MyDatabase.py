@@ -15,8 +15,27 @@ class AccountsDatabase:
     def create_tables(self):
         db_cursor = self.main_db.cursor()
         db_cursor.execute("CREATE SCHEMA IF NOT EXISTS ExpenseDatabase")
+        db_cursor.execute("USE ExpenseDatabase")
+        db_cursor.execute("CREATE TABLE IF NOT EXISTS UserTable"
+                          "(UserID VARCHAR(6) PRIMARY KEY,"
+                          "FirstName CHAR(30) NOT NULL,"
+                          "LastName CHAR(30) NOT NULL,"
+                          "Email VARCHAR(256) NOT NULL,"
+                          "PhoneNumber CHAR(11) NOT NULL,"
+                          "HashedPassword VARCHAR(256) NOT NULL)")
+        db_cursor.execute("CREATE TABLE IF NOT EXISTS ExpenseTable"
+                          "(ExpenseID AUTONUM )")
+        db_cursor.close()
         self.main_db.database = "ExpenseDatabase"
 
     @staticmethod
     def bad_connection(given_error):
         return given_error
+
+    @staticmethod
+    def return_balance(self):
+        pass
+
+if __name__ == '__main__':
+    test_db = AccountsDatabase()
+    test_db.create_tables()

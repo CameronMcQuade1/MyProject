@@ -1,19 +1,25 @@
 import MyDatabase
 import MyMessageBoxes
 import LoginScreen
+import customtkinter as ctk
 import tkinter as tk
 
 
 class MainApp:
     def __init__(self):
-        self.root = tk.Tk()
+        # Initialize the custom tkinter window
+        ctk.set_appearance_mode("light")  # Optional: Set to 'light' or 'dark'
+        ctk.set_default_color_theme("blue")  # Optional: Set color theme
+
+        self.root = ctk.CTk()  # Use CTk instead of Tk
         self.root.title('Expense Tracker')
-        self.menu_bar()
-        self.run_sequence()
-        self.centre_window(self.root, 1000, 620)
-        self.root.mainloop()
+        self.menu_bar()  # Set up the menu bar
+        self.run_sequence()  # Start the login sequence
+        self.centre_window(self.root, 1000, 620)  # Center the window
+        self.root.mainloop()  # Start the main loop
 
     def run_sequence(self):
+        # Display the login screen
         LoginScreen.MainLogin(self.root)
 
     @staticmethod
@@ -31,16 +37,14 @@ class MainApp:
         settings_menu.add_command(label='Change Background Colour')
         main_bar.add_cascade(label='Settings', menu=settings_menu)
         help_menu = tk.Menu(main_bar, tearoff=False)
-        help_menu.add_command(label='Frequently Asked Questions',
-                              command=LoginScreen.MainLogin.frequently_asked_questions_gui)
+        help_menu.add_command(label='Frequently Asked Questions')
         main_bar.add_cascade(label='Help', menu=help_menu)
 
 
 def app():
     main_db = MyDatabase.AccountsDatabase()
-    main_db.create_root_account()
     MainApp()
 
 
 if __name__ == '__main__':
-    MainApp()
+    app()  # Call the app function to run the application

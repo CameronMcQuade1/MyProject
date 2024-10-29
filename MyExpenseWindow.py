@@ -2,6 +2,7 @@ import customtkinter as ctk
 from PIL import Image
 
 import MyCustomFunctions
+import MyDatabase
 
 
 class DefaultWindow:
@@ -174,11 +175,14 @@ class DefaultWindow:
         self.remove_expense_frame.pack(expand=True, fill="both")
         self.remove_expense_window.title("Remove Expense")
         self.remove_expense_window.geometry("400x300+700+200")  # Customize the size
-
+        current_user = self.find_current_user()
+        self.expense_spreadsheet = MyDatabase.ExpenseViewer(current_user, )
         back_button = ctk.CTkButton(self.remove_expense_frame, text="Back",
                                     command=lambda: self.show_main_window(self.remove_expense_window), width=140)
         back_button.place(x=50, y=240)
         self.remove_expense_window.mainloop()
+
+
 
     def view_expenses(self):
         pass

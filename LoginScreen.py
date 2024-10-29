@@ -3,6 +3,7 @@ from PIL import Image
 import MyMessageBoxes
 from MyCustomFunctions import *
 
+
 class MainLogin:
     def __init__(self, parent):
         self.parent = parent
@@ -43,7 +44,6 @@ class MainLogin:
         # View password button
         ShowHidePasswordWidget(self.login_frame, self.enter_password, 0.87, 0.5)
 
-
         # Placing widgets with padding for better spacing
         self.enter_username.place(relx=0.5, rely=0.3, anchor='center')
         self.enter_password.place(relx=0.5, rely=0.5, anchor='center')
@@ -64,6 +64,7 @@ class MainLogin:
 
     def remove_login_frame(self):
         self.login_screen.destroy()
+
 
 if __name__ == "__main__":
     test_root = ctk.CTk()

@@ -97,6 +97,7 @@ class AccountsDatabase:
             return user_level
         except Exception as given_error:
             return given_error
+
     def check_user_exists(self, given_userid):
         try:
             db_cursor = self.main_db.cursor()
@@ -105,6 +106,8 @@ class AccountsDatabase:
             hashed_pass_from_user = db_cursor.fetchone()[0]
             return hashed_pass_from_user
         except mysql.connector.errors.InternalError:
+            return False
+        except TypeError:
             return False
 
     def return_account_amount(self):

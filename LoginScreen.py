@@ -1,7 +1,9 @@
-import customtkinter as ctk
-from PIL import Image
+import MyDatabase
+import MyExpenseWindow
 import MyMessageBoxes
-from MyCustomFunctions import *
+import PasswordHasher
+from MyCustomFunctions import ShowHidePasswordWidget, EntryPlaceHolderText
+import customtkinter as ctk
 
 
 class MainLogin:
@@ -55,8 +57,20 @@ class MainLogin:
         EntryPlaceHolderText(self.login_screen, self.enter_password, 'Password')
 
     def try_login(self):
-        # Implementation for login attempt
-        pass
+        username = self.User.get()
+        password = self.Password.get()
+        hashed_pass_if_user_exists = MyDatabase.AccountsDatabase().check_user_exists(username)
+        if hashed_pass_if_user_exists:
+            if PasswordHasher.Hasher().verify_password(hashed_pass_if_user_exists, password):
+                self.login_screen.destroy()
+                if MyDatabase.AccountsDatabase().check_user_level(username) == 0:
+                    MyExpenseWindow.DefaultWindow(self.parent, username)
+                elif MyDatabase.AccountsDatabase().check_user_level(username) == 1:
+                    MyExpenseWindow.AdminWindow(self.parent, username)
+            else:
+                MyMessageBoxes.ShowMessage().show_warning("Password is incorrect")
+        else:
+            MyMessageBoxes.ShowMessage().show_error("Username is incorrect")
 
     def new_password(self):
         # Implementation for new password functionality
@@ -68,7 +82,7 @@ class MainLogin:
 
 if __name__ == "__main__":
     test_root = ctk.CTk()
-    test_root.geometry("1400x700")
+    test_root.geometry("850x525+425+175")
     test_root.title("Login Screen")
     # Adding a gradient background color
     test_root.configure(bg="light blue")

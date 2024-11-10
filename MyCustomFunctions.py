@@ -39,9 +39,7 @@ class ShowHidePasswordText:
 
 
 class ShowHidePasswordWidget:
-
     def __init__(self, parent, target, place_x, place_y):
-
         password_hidden_image_path = "PasswordHiddenImage.png"
         password_hidden_image = Image.open(password_hidden_image_path)
         password_hidden_image = password_hidden_image.resize((20, 20))  # Resize to fit button
@@ -53,9 +51,8 @@ class ShowHidePasswordWidget:
         password_shown_image = ctk.CTkImage(light_image=password_shown_image, size=(20, 20))
         # Create the button with a proper size and rounded corners
 
-        self.show_hide_password = ctk.CTkButton(parent, width=10, height=10, text="",
-                                                image=password_hidden_image,
-                                                corner_radius=20)
+        self.show_hide_password = ctk.CTkButton(parent, width=10, height=10, image=password_hidden_image,
+                                                text="", corner_radius=20)
 
         self.show_hide_password.bind("<Button-1>", lambda event: self.show_hide_password.configure(
             image=password_shown_image) if self.show_hide_password.cget('image') == password_hidden_image else
@@ -68,3 +65,4 @@ class ShowHidePasswordWidget:
         target.bind("<Button-1>", lambda event: target.configure(
             show='*') if self.show_hide_password.cget('image') == password_hidden_image else
             target.configure(show=''))
+

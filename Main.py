@@ -1,6 +1,8 @@
 import MyDatabase
 import MyMessageBoxes
 import LoginScreen
+import CreateAccountScreen
+import MyCustomFunctions
 import customtkinter as ctk
 import tkinter as tk
 
@@ -10,17 +12,25 @@ class MainApp:
         # Initialize the custom tkinter window
         ctk.set_appearance_mode("light")  # Optional: Set to 'light' or 'dark'
         ctk.set_default_color_theme("blue")  # Optional: Set color theme
-
         self.root = ctk.CTk()  # Use CTk instead of Tk
         self.root.title('Expense Tracker')
         self.menu_bar()  # Set up the menu bar
+        self.centre_window(self.root, 850, 525)
         self.run_sequence()  # Start the login sequence
-        self.centre_window(self.root, 1000, 620)  # Center the window
         self.root.mainloop()  # Start the main loop
 
     def run_sequence(self):
-        # Display the login screen
-        LoginScreen.MainLogin(self.root)
+        if MyDatabase.AccountsDatabase().return_account_amount() == 0:
+            msg = MyMessageBoxes.ShowMessage.show_warning("No accounts detected.\n You will need to make an account.")
+            if msg == "Cancel":
+                exit()
+            elif msg == "Okay":
+                self.root.geometry("325x175+750+250")
+                CreateAccountScreen.CreateAccount(self.root)
+            else: # msg = help
+                pass
+        else:
+            LoginScreen.MainLogin(self.root)
 
     @staticmethod
     def centre_window(target, width, height):
@@ -42,7 +52,6 @@ class MainApp:
 
 
 def app():
-    main_db = MyDatabase.AccountsDatabase()
     MainApp()
 
 

@@ -2,7 +2,6 @@ import MyDatabase
 import MyMessageBoxes
 import LoginScreen
 import CreateAccountScreen
-import MyCustomFunctions
 import customtkinter as ctk
 import tkinter as tk
 

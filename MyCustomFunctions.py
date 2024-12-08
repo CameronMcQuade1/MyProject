@@ -65,4 +65,3 @@ class ShowHidePasswordWidget:
         target.bind("<Button-1>", lambda event: target.configure(
             show='*') if self.show_hide_password.cget('image') == password_hidden_image else
             target.configure(show=''))
-

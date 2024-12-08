@@ -4,6 +4,7 @@ from tkinter import ttk
 from openpyxl import Workbook
 from pathlib import Path
 from datetime import datetime
+import MyMessageBoxes
 
 
 class AccountsDatabase:
@@ -50,10 +51,12 @@ class AccountsDatabase:
         # Table 3: ExpenseTable with One-to-Many relationship with UserTable
         db_cursor.execute("""
             CREATE TABLE IF NOT EXISTS ExpenseTable (
-                ExpenseID INT AUTO_INCREMENT PRIMARY KEY,
+                ExpenseID VARCHAR(6) PRIMARY KEY,
                 UserID VARCHAR(6),
+                Name VARCHAR(30) NOT NULL,
                 Quantity INT NOT NULL,
                 Price DECIMAL(10, 2) NOT NULL,
+                Type VARCHAR(30) NOT NULL,
                 Date DATE NOT NULL,
                 FOREIGN KEY (UserID) REFERENCES UserTable(UserID) ON DELETE CASCADE
             )
@@ -65,6 +68,19 @@ class AccountsDatabase:
     @staticmethod
     def bad_connection(given_error):
         return given_error
+
+    def submit_expense_db(self, expense_inputs):
+        try:
+            cursor = self.main_db.cursor()  # Assuming `self.main_db` is the database connection
+            query = """
+                    INSERT INTO ExpenseTable (ExpenseID, UserID, Name, Quantity, Price, Type, Date)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """
+            cursor.execute(query, expense_inputs)
+            self.main_db.commit()
+            cursor.close()
+        except Exception as error:
+            raise error
 
     def add_user_to_db(self, user_id, first_name, last_name, email, phone_number, hashed_password, level, salary):
         try:
@@ -110,6 +126,16 @@ class AccountsDatabase:
         except TypeError:
             return False
 
+    def return_total_expense_amount(self):
+        try:
+            db_cursor = self.main_db.cursor()
+            db_cursor.execute("SELECT COUNT(*) FROM ExpenseTable")
+            count = db_cursor.fetchone()[0]
+            db_cursor.close()
+            return count
+        except Exception as given_error:
+            return given_error
+
     def return_account_amount(self):
         try:
             db_cursor = self.main_db.cursor()
@@ -122,15 +148,19 @@ class AccountsDatabase:
             return error
 
     def return_expenses_from_user(self, current_user):
-        cursor = self.main_db.cursor(dictionary=True)
-        cursor.execute("""
-                    SELECT ExpenseID, Quantity, Price, Date 
-                    FROM ExpenseTable 
-                    WHERE UserID = %s
-                """, (current_user,))
-        expenses = cursor.fetchall()
-        cursor.close()
-        return expenses
+        try:
+            cursor = self.main_db.cursor(dictionary=True)
+            cursor.execute("""
+                SELECT ExpenseID, Type, Quantity, Price, Date 
+                FROM ExpenseTable 
+                WHERE UserID = %s
+            """, (current_user,))
+            expenses = cursor.fetchall()
+            self.main_db.commit()
+            cursor.close()
+            return expenses
+        except Exception as given_error:
+            return given_error
 
     def return_total_inputted_from_user(self, current_user):
         try:
@@ -152,9 +182,64 @@ class AccountsDatabase:
         total_sum = sum(expense["Price"] * expense["Quantity"] for expense in expenses_from_user)
         return total_sum
 
+    def get_expenses_by_type(self, current_user):
+        """
+        Retrieves the total expense amount for each type for the given user.
+
+        Args:
+            current_user (str): The user ID whose expenses need to be retrieved.
+
+        Returns:
+            dict: A dictionary where keys are expense types and values are the summed amounts.
+        """
+        try:
+            cursor = self.main_db.cursor(dictionary=True)
+            query = """
+                SELECT Type, SUM(Price * Quantity) AS TotalAmount
+                FROM ExpenseTable
+                WHERE UserID = %s
+                GROUP BY Type;
+            """
+            cursor.execute(query, (current_user,))
+            results = cursor.fetchall()
+            cursor.close()
+
+            # Convert the query results into a dictionary
+            expenses_by_type = {row['Type']: row['TotalAmount'] for row in results}
+            return expenses_by_type
+        except Exception as error:
+            raise error
+
+    def remove_given_expenses(self, given_expense_ids):
+        """Deletes expenses with the given expense_ids from the ExpenseTable."""
+        try:
+            cursor = self.main_db.cursor()
+
+            # Create the SQL DELETE query with placeholders
+            query = "DELETE FROM ExpenseTable WHERE ExpenseID IN (%s)"
+
+            # Generate a string of placeholders for each expense_id
+            format_strings = ','.join(['%s'] * len(given_expense_ids))
+
+            # Execute the query with the expense_id list as the parameters
+            cursor.execute(query % format_strings, tuple(given_expense_ids))
+
+            # Commit the transaction
+            self.main_db.commit()
+            cursor.close()
+
+            # Check how many rows were deleted
+            if cursor.rowcount > 0:
+                return f"Successfully deleted {cursor.rowcount} expense(s)."
+            else:
+                raise "No expenses found with the given IDs."
+
+        except Exception as e:
+            raise f"Error occurred while removing expenses: {e}"
+
 
 class ExpenseViewer:
-    def __init__(self, user_id, parent):
+    def __init__(self, user_id, parent, submit_frame):
         self.spreadsheet_frame = ctk.CTkFrame(parent)
         self.spreadsheet_frame.pack(expand=True, fill='both')
         self.db = AccountsDatabase()
@@ -177,9 +262,9 @@ class ExpenseViewer:
             self.display_expenses()
 
             # Submit button to handle selected expenses
-            self.submit_button = ctk.CTkButton(self.spreadsheet_frame, text="Submit",
+            self.submit_button = ctk.CTkButton(submit_frame, text="Submit",
                                                command=self.get_selected_expenses)
-            self.submit_button.pack(pady=10)
+            self.submit_button.place(x=315, y=250)
         else:
             ctk.CTkLabel(self.spreadsheet_frame, text="No expenses found from your user.\n Only admins can see all "
                                                       "expenses.").place(x=100, y=100)
@@ -188,7 +273,7 @@ class ExpenseViewer:
         for row, expense in enumerate(self.expenses, start=1):
             # Checkbox for each expense
             checkbox_var = ctk.BooleanVar()
-            checkbox = ctk.CTkCheckBox(self.scrollable_frame, variable=checkbox_var)
+            checkbox = ctk.CTkCheckBox(self.scrollable_frame, variable=checkbox_var, text="")
             checkbox.grid(row=row, column=0, padx=10, pady=5)
             self.expense_checkboxes.append((checkbox_var, expense["ExpenseID"]))
 
@@ -200,6 +285,11 @@ class ExpenseViewer:
 
     def get_selected_expenses(self):
         selected_expenses = [expense_id for var, expense_id in self.expense_checkboxes if var.get()]
+        try:
+            remove_expenses = AccountsDatabase().remove_given_expenses(selected_expenses)
+            MyMessageBoxes.ShowMessage().show_info(remove_expenses)
+        except Exception as given_error:
+            MyMessageBoxes.ShowMessage().show_error(given_error)
 
 
 class ExpenseExcelSpreadsheet:
@@ -269,4 +359,4 @@ class ExpenseExcelSpreadsheet:
 
 
 if __name__ == '__main__':
-    test_db = AccountsDatabase()
+    AccountsDatabase()

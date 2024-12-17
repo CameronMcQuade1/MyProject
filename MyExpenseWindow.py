@@ -36,7 +36,7 @@ class DefaultWindow:
         self.nb.add("Expenses")
         self.nb.add("Graphs")
         self.nb.add("Tables")
-        self.nb.add("Plotter")
+        self.nb.add("Predictor")
         self.nb.set("Expenses")
 
         self.setup_expense_window()
@@ -46,7 +46,7 @@ class DefaultWindow:
         self.create_expenses_tab()
         self.create_graphs_tab()
         self.create_table_tab()
-        self.create_plotter_tab()
+        self.create_predictor_tab()
 
     def remove_main_window(self):
         self.parent.withdraw()
@@ -210,7 +210,7 @@ class DefaultWindow:
         self.view_expense_frame = ctk.CTkFrame(self.view_expense_window)
         self.view_expense_frame.pack(expand=True, fill="both")
         self.view_expense_window.title("View Expenses")
-        self.view_expense_window.geometry("600x370+660+200")
+        self.view_expense_window.geometry("750x463+475+125")
         self.excel_expense_spreadsheet = MyDatabase.ExpenseExcelSpreadsheet(self.current_user, self.view_expense_frame)
         back_button = ctk.CTkButton(self.view_expense_frame, text="Back",
                                     command=lambda: self.show_main_window(self.view_expense_window), width=140)
@@ -252,6 +252,7 @@ class DefaultWindow:
 
         # Variable to track the currently displayed graph
         current_graph = dict(name=str(), plot_func=type(any))
+        current_year = ctk.StringVar()
 
         def clear_canvas():
             """Clears any existing canvas in the plot frame."""
@@ -380,19 +381,24 @@ class DefaultWindow:
         # Buttons for selecting graphs in the button_frame
         time_graph_button = ctk.CTkButton(button_frame, text="Money Spent Over Time Graph",
                                           command=plot_expenses_over_time)
-        time_graph_button.pack(side="left", padx=10, expand=True, fill='both')
+        time_graph_button.pack(side="left", padx=6, expand=True, fill='both')
 
         distribution_graph_button = ctk.CTkButton(button_frame, text="Expense Type Pie Chart",
                                                   command=plot_expense_distribution)
-        distribution_graph_button.pack(side="left", padx=10, expand=True, fill='both')
+        distribution_graph_button.pack(side="left", padx=6, expand=True, fill='both')
 
         heatmap_button = ctk.CTkButton(button_frame, text="Yearly Expense Heatmap",
                                        command=plot_expense_heatmap)
-        heatmap_button.pack(side="left", padx=10, expand=True, fill='both')
+        heatmap_button.pack(side="left", padx=6, expand=True, fill='both')
+
+        choose_year_button = ctk.CTkOptionMenu(button_frame, values=["Year: 2024", "Year: 2025",
+                                                                     "Year: 2026"], variable=current_year)
+        choose_year_button.set("Choose Current Year:")
+        choose_year_button.pack(side="left", padx=6, expand=True, fill='both')
 
         refresh_graph_button = ctk.CTkButton(button_frame, text="Refresh Graph",
                                              command=refresh_graphs)
-        refresh_graph_button.pack(side="left", padx=10, expand=True, fill='both')
+        refresh_graph_button.pack(side="left", padx=6, expand=True, fill='both')
 
         # Default graph display
         plot_expenses_over_time()
@@ -488,13 +494,13 @@ class DefaultWindow:
         # Fetch and display data initially
         fetch_table_data()
 
-    def create_plotter_tab(self):
+    def create_predictor_tab(self):
         """
         Creates the 'Plotter' tab in the notebook to predict future expenses using historical data and display them on a graph.
         """
 
         # Create the Plotter tab and its main frame
-        plotter_tab = self.nb.tab("Plotter")
+        plotter_tab = self.nb.tab("Predictor")
         plotter_tab_frame = ctk.CTkFrame(plotter_tab)
         plotter_tab_frame.pack(fill="both", expand=True)
 
@@ -597,13 +603,13 @@ class DefaultWindow:
         # Create a button to trigger the prediction
         predict_button = ctk.CTkButton(
             plotter_tab_frame,
-            text="Predict Future Expenses",
+            text="Refresh Future Expenses Prediction",
             command=fetch_and_predict_expenses
         )
         predict_button.pack(pady=10)
 
         # Display the initial empty graph
-        clear_canvas()
+        fetch_and_predict_expenses()
 
 
 class AdminWindow(DefaultWindow):

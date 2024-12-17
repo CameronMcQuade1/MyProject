@@ -2,6 +2,7 @@ import mysql.connector
 import customtkinter as ctk
 from tkinter import ttk
 from openpyxl import Workbook
+from openpyxl.styles import Alignment
 from pathlib import Path
 from datetime import datetime
 import MyMessageBoxes
@@ -305,11 +306,13 @@ class ExpenseExcelSpreadsheet:
 
         if self.expenses:
             # Treeview setup for displaying expenses
-            self.tree = ttk.Treeview(self.excel_spreadsheet_frame, columns=("ExpenseID", "Quantity", "Price", "Date"),
+            self.tree = ttk.Treeview(self.excel_spreadsheet_frame, columns=("ExpenseID", "Quantity", "Price",
+                                                                            "Type", "Date"),
                                      show="headings")
             self.tree.heading("ExpenseID", text="ExpenseID")
             self.tree.heading("Quantity", text="Quantity")
             self.tree.heading("Price", text="Price")
+            self.tree.heading("Type", text="Type")
             self.tree.heading("Date", text="Date")
             self.tree.pack(side="left", fill="both", expand=True)
 
@@ -324,8 +327,17 @@ class ExpenseExcelSpreadsheet:
 
         # Populate Treeview with the data
         for expense in self.expenses:
-            self.tree.insert("", "end", values=(
-                expense["ExpenseID"], expense["Quantity"], f"${expense['Price']:.2f}", expense["Date"]))
+            if isinstance(expense, dict):  # Ensure each row is a dictionary
+                self.tree.insert(
+                    "", "end",
+                    values=(
+                        expense.get("ExpenseID", ""),
+                        expense.get("Type", "Unknown"),  # Use 'Unknown' if Type is missing
+                        expense.get("Quantity", 0),
+                        f"£{expense.get('Price', 0):.2f}",
+                        expense.get("Date", ""),
+                    ),
+                )
 
         # Add scrollbar
         scrollbar = ttk.Scrollbar(self.excel_spreadsheet_frame, orient="vertical", command=self.tree.yview)
@@ -336,22 +348,27 @@ class ExpenseExcelSpreadsheet:
         if self.expenses:
             workbook = Workbook()
             sheet = workbook.active
+            sheet.column_dimensions['A'].width = 10
+            sheet.column_dimensions['B'].width = 10
+            sheet.column_dimensions['C'].width = 10
+            sheet.column_dimensions['D'].width = 10
+            sheet.column_dimensions['E'].width = 15
             sheet.title = "User Expenses"
 
             # Define the headers and write them to the first row
-            headers = ["ExpenseID", "Quantity", "Price", "Date"]
+            headers = ["ExpenseID", "Quantity", "Price", "Type", "Date"]
             sheet.append(headers)
 
             # Add expense data rows to the sheet
             for expense in self.expenses:
-                sheet.append([expense["ExpenseID"], expense["Quantity"], expense["Price"], expense["Date"]])
+                sheet.append([expense["ExpenseID"], expense["Quantity"], expense["Price"],
+                              expense["Type"], expense["Date"]])
 
             # Determine the path to the Downloads folder
             downloads_path = Path.home() / "Downloads"
             # Name the file with a timestamp for uniqueness
             filename = f"expenses_{self.user_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
             file_path = downloads_path / filename
-
             # Save the workbook
             workbook.save(file_path)
         else:

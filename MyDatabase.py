@@ -103,7 +103,7 @@ class AccountsDatabase:
             cursor.close()
             return
         except Exception as given_error:
-            print(given_error)
+            return given_error
 
     def check_user_level(self, given_userid):
         try:
@@ -196,18 +196,17 @@ class AccountsDatabase:
         try:
             cursor = self.main_db.cursor(dictionary=True)
             query = """
-                SELECT Type, SUM(Price * Quantity) AS TotalAmount
+                SELECT Date, Type, SUM(Price * Quantity) AS TotalAmount
                 FROM ExpenseTable
                 WHERE UserID = %s
-                GROUP BY Type;
+                GROUP BY Date, Type;
             """
             cursor.execute(query, (current_user,))
             results = cursor.fetchall()
             cursor.close()
 
             # Convert the query results into a dictionary
-            expenses_by_type = {row['Type']: row['TotalAmount'] for row in results}
-            return expenses_by_type
+            return results
         except Exception as error:
             raise error
 
@@ -240,14 +239,18 @@ class AccountsDatabase:
 
 
 class ExpenseViewer:
-    def __init__(self, user_id, parent, submit_frame):
+    def __init__(self, user_id, parent, submit_frame, on_remove_callback):
+        self.__parent = parent
         self.spreadsheet_frame = ctk.CTkFrame(parent)
         self.spreadsheet_frame.pack(expand=True, fill='both')
         self.db = AccountsDatabase()
         self.user_id = user_id
         self.expenses = self.db.return_expenses_from_user(self.user_id)
-        if self.expenses:
 
+        # Store the callback
+        self.on_remove_callback = on_remove_callback
+
+        if self.expenses:
             # Scrollable frame for spreadsheet-like display
             self.scrollable_frame = ctk.CTkScrollableFrame(self.spreadsheet_frame, width=580, height=300)
             self.scrollable_frame.pack(fill="both", expand=True)
@@ -265,7 +268,7 @@ class ExpenseViewer:
             # Submit button to handle selected expenses
             self.submit_button = ctk.CTkButton(submit_frame, text="Submit",
                                                command=self.get_selected_expenses)
-            self.submit_button.place(x=315, y=250)
+            self.submit_button.pack(expand=True, side='right')
         else:
             ctk.CTkLabel(self.spreadsheet_frame, text="No expenses found from your user.\n Only admins can see all "
                                                       "expenses.").place(x=100, y=100)
@@ -287,18 +290,23 @@ class ExpenseViewer:
     def get_selected_expenses(self):
         selected_expenses = [expense_id for var, expense_id in self.expense_checkboxes if var.get()]
         try:
+            # Attempt to remove the selected expenses from the database
             remove_expenses = AccountsDatabase().remove_given_expenses(selected_expenses)
             MyMessageBoxes.ShowMessage().show_info(remove_expenses)
+
+            self.on_remove_callback()
+
         except Exception as given_error:
             MyMessageBoxes.ShowMessage().show_error(given_error)
 
 
 class ExpenseExcelSpreadsheet:
-    def __init__(self, user_id, parent):
+    def __init__(self, user_id, parent, year=None):
         self.parent = parent
         self.db = AccountsDatabase()
         self.user_id = user_id
-        self.expenses = self.db.return_expenses_from_user(self.user_id)
+        self.year = year
+        self.expenses = self.get_expenses()  # Fetch expenses based on the year filter
 
         # Frame for the Treeview display
         self.excel_spreadsheet_frame = ctk.CTkFrame(self.parent)
@@ -319,32 +327,43 @@ class ExpenseExcelSpreadsheet:
             # Load expenses data for display
             self.display_expenses()
         else:
-            ctk.CTkLabel(self.excel_spreadsheet_frame, text="No expenses found from your user.\n Only admins can see"
+            ctk.CTkLabel(self.excel_spreadsheet_frame, text="No expenses found for your user.\n Only admins can see"
                                                             " all expenses.").place(x=100, y=100)
 
-    def display_expenses(self):
-        # Get user expenses using the database method
+    def get_expenses(self):
+        """Fetch expenses for the user, optionally filtering by year."""
+        all_expenses = self.db.return_expenses_from_user(self.user_id)
+        if self.year:
+            # Filter expenses by the specified year
+            filtered_expenses = [
+                expense for expense in all_expenses
+                if datetime.strptime(str(expense['Date']), '%Y-%m-%d').year == self.year
+            ]
+            return filtered_expenses
+        return all_expenses
 
-        # Populate Treeview with the data
+    def display_expenses(self):
+        """Populate the Treeview with expense data."""
         for expense in self.expenses:
             if isinstance(expense, dict):  # Ensure each row is a dictionary
                 self.tree.insert(
                     "", "end",
                     values=(
                         expense.get("ExpenseID", ""),
-                        expense.get("Type", "Unknown"),  # Use 'Unknown' if Type is missing
                         expense.get("Quantity", 0),
                         f"£{expense.get('Price', 0):.2f}",
+                        expense.get("Type", "Unknown"),
                         expense.get("Date", ""),
                     ),
                 )
 
-        # Add scrollbar
+        # Add a scrollbar
         scrollbar = ttk.Scrollbar(self.excel_spreadsheet_frame, orient="vertical", command=self.tree.yview)
         self.tree.configure(yscrollcommand=scrollbar.set)
         scrollbar.pack(side="right", fill="y")
 
     def download_expenses(self):
+        """Export the displayed expenses to an Excel spreadsheet."""
         if self.expenses:
             workbook = Workbook()
             sheet = workbook.active
@@ -353,7 +372,7 @@ class ExpenseExcelSpreadsheet:
             sheet.column_dimensions['C'].width = 10
             sheet.column_dimensions['D'].width = 10
             sheet.column_dimensions['E'].width = 15
-            sheet.title = "User Expenses"
+            sheet.title = f"User Expenses {self.year if self.year else 'All'}"
 
             # Define the headers and write them to the first row
             headers = ["ExpenseID", "Quantity", "Price", "Type", "Date"]
@@ -367,12 +386,13 @@ class ExpenseExcelSpreadsheet:
             # Determine the path to the Downloads folder
             downloads_path = Path.home() / "Downloads"
             # Name the file with a timestamp for uniqueness
-            filename = f"expenses_{self.user_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+            filename = f"expenses_{self.user_id}_{self.year if self.year else 'all'}_{datetime.now().strftime(
+                '%Y%m%d_%H%M%S')}.xlsx"
             file_path = downloads_path / filename
             # Save the workbook
             workbook.save(file_path)
         else:
-            raise Exception("No expenses found from your user.")
+            raise Exception("No expenses found for your user from the year chosen.")
 
 
 if __name__ == '__main__':

@@ -35,7 +35,7 @@ class DefaultWindow:
         self.nb.add("Tracker Settings")
         self.nb.add("Expenses")
         self.nb.add("Graphs")
-        self.nb.add("Tables")
+        self.nb.add("Table")
         self.nb.add("Predictor")
         self.nb.set("Expenses")
 
@@ -100,7 +100,7 @@ class DefaultWindow:
 
         # View Expenses button
         self.remove_expenses_button = ctk.CTkButton(expenses_tab, image=red_remove_image, command=self.remove_expense,
-                                                    width=200, height=100, text="Remove Expense", compound="bottom",
+                                                    width=200, height=100, text="Remove Expense(s)", compound="bottom",
                                                     font=("Arial", 16))
         self.remove_expenses_button.place(x=450, y=100)
 
@@ -195,13 +195,19 @@ class DefaultWindow:
         self.remove_expense_window = ctk.CTk()  # Or ctk.CTkToplevel(self.parent) to make it a child of the main window
         self.remove_expense_frame = ctk.CTkFrame(self.remove_expense_window)
         self.remove_expense_frame.pack(expand=True, fill="both")
-        self.remove_expense_window.title("Remove Expense")
-        self.remove_expense_window.geometry("500x310+660+200")  # Customize the size
+        self.remove_expense_window.title("Remove Expense(s)")
+        self.remove_expense_window.geometry("600x370+660+200")  # Customize the size
+
+        # Pass the callback function (show_main_window) to ExpenseViewer
         self.expense_spreadsheet = MyDatabase.ExpenseViewer(self.current_user, self.remove_expense_frame,
-                                                            self.remove_expense_frame)
+                                                            self.remove_expense_frame,
+                                                            lambda: self.show_main_window(self.remove_expense_window))
+
+        # Back button to go back to the main window
         back_button = ctk.CTkButton(self.remove_expense_frame, text="Back",
                                     command=lambda: self.show_main_window(self.remove_expense_window), width=140)
-        back_button.place(x=15, y=250)
+        back_button.pack(expand=True, side='left')
+
         self.remove_expense_window.mainloop()
 
     def view_expenses(self):
@@ -222,14 +228,49 @@ class DefaultWindow:
         download_table = MyMessageBoxes.ShowMessage.ask_question("Are you sure you want to download? "
                                                                  "Go to 'View Expenses' to see what you will"
                                                                  " be downloading.",
-                                                                 "No", "Yes", "Back")
-        if download_table == "Yes":
+                                                                 "Cancel", "All years",
+                                                                 "Previous year")
+        if download_table == "All years":
             try:
                 MyDatabase.ExpenseExcelSpreadsheet(self.current_user, ctk.CTk()).download_expenses()
                 MyMessageBoxes.ShowMessage.show_info("Spreadsheet downloaded successfully.")
+                self.show_main_window(ctk.CTkToplevel())
             except Exception as error:
                 MyMessageBoxes.ShowMessage.show_info(f"Something went wrong: {str(error)}")
-        self.show_main_window(ctk.CTk())
+        elif download_table == "Previous year":
+            expenses = self.main_db.return_expenses_from_user(self.current_user)
+            if not expenses:
+                MyMessageBoxes.ShowMessage.show_info("No expenses found for this user.")
+                return
+            years = {datetime.strptime(str(expense['Date']), '%Y-%m-%d').year for expense in expenses}
+            earliest_year = min(years)
+            current_year = datetime.now().year
+            year_toplevel = ctk.CTkToplevel()
+            year_toplevel.geometry('+960+400')
+            years_label = ctk.CTkLabel(year_toplevel, text=f"Found expenses from {earliest_year} - {current_year}")
+            if earliest_year == current_year:
+                years_label.configure(text=f"Found expenses from {earliest_year}")
+            years_label.pack(expand=True, fill="both")
+            year_choices_frame = ctk.CTkFrame(year_toplevel)
+            year_choices_frame.pack(expand=True, fill="both")
+            for year in range(earliest_year, current_year + 1):
+                button = ctk.CTkButton(year_choices_frame, text=str(year),
+                                       command=lambda: self.download_expenses_for_year(year, year_toplevel))
+                button.grid(row=(year - earliest_year) // 5, column=(year - earliest_year) % 5, padx=10,
+                            pady=10)  # Arrange in a grid
+            cancel_button = ctk.CTkButton(year_toplevel, text="Back", command=lambda: (year_toplevel.destroy(),
+                                                                                       self.export_expenses()))
+            cancel_button.pack(expand=True, fill="both")
+        elif download_table == "Cancel":
+            self.show_main_window(ctk.CTkToplevel())
+
+    def download_expenses_for_year(self, year, parent):
+        try:
+            MyDatabase.ExpenseExcelSpreadsheet(self.current_user, ctk.CTk(), year).download_expenses()
+            MyMessageBoxes.ShowMessage.show_info(f"Spreadsheet for {year} downloaded successfully.")
+            self.show_main_window(parent)
+        except Exception as error:
+            MyMessageBoxes.ShowMessage.show_info(f"Something went wrong: {str(error)}")
 
     def create_income_tab(self):
         pass
@@ -267,7 +308,7 @@ class DefaultWindow:
             canvas.draw()
 
         def plot_expenses_over_time():
-            """Plots the daily expenses for the current user."""
+            """Plots the daily expenses for the current user for a selected year."""
             current_graph["name"] = "expenses_over_time"
             current_graph["plot_func"] = plot_expenses_over_time
             clear_canvas()
@@ -276,12 +317,25 @@ class DefaultWindow:
                 if not expenses:
                     raise ValueError("No expenses data available to plot.")
 
-                # Aggregate expenses by date
+                # Extract the year from the current_year input (assuming it is a string in the format 'Year: YYYY')
+                selected_year = int(current_year.get().strip("Year: "))
+
+                # Aggregate expenses by date for the selected year
                 aggregated_expenses = defaultdict(float)
                 for expense in expenses:
+                    # Extract year from the expense date and compare with selected year
+                    expense_year = datetime.strptime(str(expense['Date']), '%Y-%m-%d').year
+                    if expense_year != selected_year:
+                        continue  # Skip expenses that do not match the selected year
+
+                    # If the expense matches the selected year, aggregate it by date
                     date = datetime.strptime(str(expense['Date']), '%Y-%m-%d').date()
                     aggregated_expenses[date] += float(expense['Price']) * expense['Quantity']
 
+                if not aggregated_expenses:
+                    raise ValueError(f"No expenses found for the selected year: {selected_year}")
+
+                # Sort the dates and create a list of total amounts for the sorted dates
                 sorted_dates = sorted(aggregated_expenses.keys())
                 total_amounts = [aggregated_expenses[date] for date in sorted_dates]
 
@@ -292,7 +346,7 @@ class DefaultWindow:
                 ax.plot(sorted_dates, total_amounts, marker='o', linestyle='-', color='b')
 
                 # Customize the graph
-                ax.set_title(f"Daily Expenses for User: {self.current_user}", fontsize=14)
+                ax.set_title(f"Daily Expenses for {self.current_user} in {selected_year}", fontsize=14)
                 ax.set_xlabel("Date", fontsize=12)
                 ax.set_ylabel("Total Expense (£)", fontsize=12)
                 ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
@@ -313,7 +367,22 @@ class DefaultWindow:
                 if not data:
                     raise ValueError("No expense distribution data available.")
 
-                types, amounts = zip(*data.items())
+                # Dictionary to accumulate amounts for each type
+                aggregated_data = {}
+                selected_year = int(current_year.get().strip("Year: "))
+
+                for expense in data:
+                    if expense['Date'].year == int(current_year.get().strip("Year: ")):
+                        expense_type = expense['Type']
+                        if expense_type not in aggregated_data:
+                            aggregated_data[expense_type] = 0
+                        aggregated_data[expense_type] += expense['TotalAmount']
+
+                if not aggregated_data:
+                    raise ValueError(f"No expenses found for the selected year: {selected_year}")
+
+                types = tuple(aggregated_data.keys())
+                amounts = tuple(aggregated_data.values())
 
                 fig = Figure(figsize=(6, 4), dpi=100)
                 fig.patch.set_facecolor('#cfcfcf')
@@ -337,11 +406,17 @@ class DefaultWindow:
 
                 # Aggregate expenses by month and day of the month
                 aggregated_expenses = defaultdict(float)
+                selected_year = int(current_year.get().strip("Year: "))
+
                 for expense in expenses:
                     date = datetime.strptime(str(expense['Date']), '%Y-%m-%d').date()
-                    month = date.month  # Get the month (1 to 12)
-                    day_of_month = date.day  # Get the day of the month (1 to 31)
-                    aggregated_expenses[(month, day_of_month)] += float(expense['Price']) * expense['Quantity']
+                    if date.year == selected_year:  # Check if the expense matches the selected year
+                        month = date.month  # Get the month (1 to 12)
+                        day_of_month = date.day  # Get the day of the month (1 to 31)
+                        aggregated_expenses[(month, day_of_month)] += float(expense['Price']) * expense['Quantity']
+
+                if not aggregated_expenses:
+                    raise ValueError(f"No expenses found for the selected year: {selected_year}")
 
                 # Create a 2D matrix for the heatmap (31 days x 12 months)
                 heatmap_data = np.zeros((31, 12))  # 31 rows (days of the month), 12 columns (months)
@@ -390,10 +465,12 @@ class DefaultWindow:
         heatmap_button = ctk.CTkButton(button_frame, text="Yearly Expense Heatmap",
                                        command=plot_expense_heatmap)
         heatmap_button.pack(side="left", padx=6, expand=True, fill='both')
-
-        choose_year_button = ctk.CTkOptionMenu(button_frame, values=["Year: 2024", "Year: 2025",
-                                                                     "Year: 2026"], variable=current_year)
-        choose_year_button.set("Choose Current Year:")
+        starting_year = datetime.now().year
+        choose_year_button = ctk.CTkOptionMenu(button_frame, values=[f'Year: {starting_year}',
+                                                                     f'Year: {starting_year + 1}',
+                                                                     f'Year: {starting_year + 2}'],
+                                               variable=current_year)
+        choose_year_button.set('Year: 2024')
         choose_year_button.pack(side="left", padx=6, expand=True, fill='both')
 
         refresh_graph_button = ctk.CTkButton(button_frame, text="Refresh Graph",
@@ -409,7 +486,7 @@ class DefaultWindow:
         including the expense type.
         """
         # Create the Table tab and its main frame
-        table_tab = self.nb.tab("Tables")
+        table_tab = self.nb.tab("Table")
         table_tab_frame = ctk.CTkFrame(table_tab)
         control_frame = ctk.CTkFrame(table_tab_frame)
 
@@ -477,7 +554,7 @@ class DefaultWindow:
                             ),
                         )
             except Exception as e:
-                print(f"Error loading data into table: {e}")
+                return f"Error loading data into table: {e}"
 
         def refresh_table():
             """
@@ -556,7 +633,7 @@ class DefaultWindow:
                     [(datetime.today() + timedelta(days=i) - datetime(1970, 1, 1)).days for i in range(1, 31)]
                 ).reshape(-1, 1)  # Predict for the next 30 days
                 future_expenses = model.predict(future_dates)
-
+                future_expenses = np.maximum(future_expenses, 0)
                 # Create a matplotlib figure for plotting
                 fig = Figure(figsize=(8, 5), dpi=100)
                 fig.patch.set_facecolor('#cfcfcf')

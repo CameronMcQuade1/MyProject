@@ -32,7 +32,6 @@ class DefaultWindow:
         self.setup_notebook()
 
     def setup_notebook(self):
-        self.nb.add("Tracker Settings")
         self.nb.add("Expenses")
         self.nb.add("Graphs")
         self.nb.add("Table")
@@ -42,7 +41,6 @@ class DefaultWindow:
         self.setup_expense_window()
 
     def setup_expense_window(self):
-        self.create_tracker_settings_tab()
         self.create_expenses_tab()
         self.create_graphs_tab()
         self.create_table_tab()
@@ -54,9 +52,6 @@ class DefaultWindow:
     def show_main_window(self, target):
         target.withdraw()
         self.parent.deiconify()
-
-    def create_tracker_settings_tab(self):
-        pass
 
     def create_expenses_tab(self):
         # Access the "Expenses" tab directly

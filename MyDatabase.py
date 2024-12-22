@@ -247,7 +247,7 @@ class ExpenseViewer:
         self.user_id = user_id
         self.expenses = self.db.return_expenses_from_user(self.user_id)
 
-        # Store the callback
+        # Store the callback function
         self.on_remove_callback = on_remove_callback
 
         if self.expenses:

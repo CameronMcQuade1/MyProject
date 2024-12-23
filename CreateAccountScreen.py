@@ -5,9 +5,10 @@ import MyDatabase
 import MyMessageBoxes
 import MyValidator
 import PasswordHasher
-import requests
 import random
-import time
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 
 class CreateAccount:
@@ -25,6 +26,8 @@ class CreateAccount:
         self.__phone_number = ctk.StringVar()
         self.__password = ctk.StringVar()
         self.__salary = ctk.StringVar()
+        self.__verification_code = ctk.StringVar()
+        self.__password_verification = ctk.StringVar()
 
         # Create frames
         self.create_frames()
@@ -78,7 +81,7 @@ class CreateAccount:
         self.frames.append(self.details_frame)
 
         # Create the "Next" and "Back" buttons
-        self.name_exit_button = ctk.CTkButton(self.name_frame, text="Exit", command=self.previous_frame, width=80)
+        self.name_exit_button = ctk.CTkButton(self.name_frame, text="Exit", command=self.parent.destroy, width=80)
         self.name_exit_button.place(anchor="center", relx=0.365, rely=0.9)
 
         self.name_next_button = ctk.CTkButton(self.name_frame, text="Next", command=self.next_frame, width=80)
@@ -117,7 +120,7 @@ class CreateAccount:
         password = self.__password.get()
         admin = self.__admin_var.get()
         salary = self.__salary.get()
-        user_count = MyDatabase.AccountsDatabase().return_account_amount()
+        user_count = MyDatabase.AccountsDatabase().return_account_amount() + 1
         user_id = f"{first_name[0].upper()}{last_name[0].upper()}{user_count:04d}"
 
         def validate_details():
@@ -133,12 +136,16 @@ class CreateAccount:
                     == correct_validation):
 
                 hashed_password = PasswordHasher.Hasher().hash_password(password)
-                MyDatabase.AccountsDatabase().add_user_to_db(user_id, first_name, last_name, email,
-                                                             phone_number, hashed_password, admin, salary)
                 self.create_account_screen.destroy()
-                self.parent.geometry("850x525+425+175")
-                MyMessageBoxes.ShowMessage().show_info(f"Account Created! Your account ID: {user_id}")
-                LoginScreen.MainLogin(self.parent)
+                test_verification = self.two_factor_auth()
+                if test_verification:
+                    MyDatabase.AccountsDatabase().add_user_to_db(user_id, first_name, last_name, email,
+                                                                 phone_number, hashed_password, admin, salary)
+                    self.parent.geometry("850x525+425+175")
+                    MyMessageBoxes.ShowMessage().show_info(f"Account Created! Your account ID: {user_id}")
+                    LoginScreen.MainLogin(self.parent)
+                else:
+                    CreateAccount(self.parent)
             else:
                 MyMessageBoxes.ShowMessage().show_info(f"- First & Last name <= 30 characters \n"
                                                        "- Email must be in correct format \n"
@@ -149,6 +156,65 @@ class CreateAccount:
 
         validate_details()
 
+    def two_factor_auth(self):
+        verification_result = ctk.BooleanVar()
+        MyMessageBoxes.ShowMessage().show_info("- A verification code has been sent to the email you provided. \n"
+                                               "- Please verify your details so your account can be created.")
+        self.create_account_screen.destroy()
+        verification_frame = ctk.CTkFrame(self.parent)
+        verification_frame.pack(expand=True, fill="both")
+        enter_code = ctk.CTkLabel(verification_frame, text="Enter Verification Code:", font=('Calibri', 20))
+        enter_code.place(anchor="center", relx=0.5, rely=0.15)
+        code_entry = ctk.CTkEntry(verification_frame, width=150)
+        code_entry.place(anchor="center", relx=0.5, rely=0.3)
+        enter_password = ctk.CTkLabel(verification_frame, text="Re-enter Password:", font=('Calibri', 20))
+        enter_password.place(anchor="center", relx=0.5, rely=0.5)
+        password_entry = ctk.CTkEntry(verification_frame, width=150)
+        password_entry.place(anchor="center", relx=0.5, rely=0.65)
+        MyCustomFunctions.ShowHidePasswordWidget(verification_frame, password_entry, 0.8, 0.65)
+        MyCustomFunctions.EntryPlaceHolderText(verification_frame, code_entry, "Code:")
+        MyCustomFunctions.EntryPlaceHolderText(verification_frame, password_entry, "Password:")
+        back_button = ctk.CTkButton(verification_frame, text="Back", width=100, command=lambda: go_back())
+        back_button.place(anchor="center", relx=0.3, rely=0.9)
+        verify_button = ctk.CTkButton(verification_frame, text="Verify", width=100, command=lambda: try_verify())
+        verify_button.place(anchor="center", relx=0.7, rely=0.9)
+
+        # Send the email
+        try:
+            with smtplib.SMTP("smtp.mailersend.net", 587) as server:
+                sender_email = "MS_AElKUp@trial-k68zxl2x8k9gj905.mlsender.net"
+                sender_pass = "T1vHXqPbVSwTndFU"
+                receiver_email = str(self.__email.get())
+
+                subject = "Verification Code"
+                verification_code = random.randint(100000, 999999)
+                body = f"Enter the following verification code into the box: {verification_code}."
+
+                msg = MIMEMultipart()
+                msg['From'] = sender_email
+                msg['To'] = receiver_email
+                msg['Subject'] = subject
+
+                msg.attach(MIMEText(body, 'plain'))
+                # Replace with your SMTP server and port
+                server.starttls()  # Secure the connection
+                server.login(sender_email, sender_pass)
+                server.sendmail(sender_email, receiver_email, msg.as_string())
+        except Exception as e:
+            MyMessageBoxes.ShowMessage().show_error(f"Error: {e}")
+
+        def go_back():
+            verification_result.set(False)
+            verification_frame.destroy()
+
+        def try_verify():
+            if (code_entry.get() == str(verification_code)) and (password_entry.get() == self.__password.get()):
+                verification_result.set(True)
+                verification_frame.destroy()
+
+        self.parent.wait_variable(verification_result)  # Block until `verification_result` is set
+        return verification_result.get()
+
 
 if __name__ == '__main__':
     ctk.set_appearance_mode("light")  # Optional: Set to 'light' or 'dark'
@@ -157,6 +223,3 @@ if __name__ == '__main__':
     root.geometry("325x175+750+250")
     CreateAccount(root)
     root.mainloop()
-
-
-

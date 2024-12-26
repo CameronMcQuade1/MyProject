@@ -28,6 +28,7 @@ class CreateAccount:
         self.__salary = ctk.StringVar()
         self.__verification_code = ctk.StringVar()
         self.__password_verification = ctk.StringVar()
+        self.__random_code = random.randint(100000, 999999)
 
         # Create frames
         self.create_frames()
@@ -142,7 +143,9 @@ class CreateAccount:
                     MyDatabase.AccountsDatabase().add_user_to_db(user_id, first_name, last_name, email,
                                                                  phone_number, hashed_password, admin, salary)
                     self.parent.geometry("850x525+425+175")
-                    MyMessageBoxes.ShowMessage().show_info(f"Account Created! Your account ID: {user_id}")
+                    MyMessageBoxes.ShowMessage().show_info("Account Created - Your account ID has been emailed to you!")
+                    self.email_user("Account ID",
+                                    f"Your Account ID: {user_id}")
                     LoginScreen.MainLogin(self.parent)
                 else:
                     CreateAccount(self.parent)
@@ -180,15 +183,33 @@ class CreateAccount:
         verify_button.place(anchor="center", relx=0.7, rely=0.9)
 
         # Send the email
+        self.email_user("Verification Code", f"Enter the following code into the box: "
+                                             f"{self.__random_code}")
+
+        def go_back():
+            verification_result.set(False)
+            verification_frame.destroy()
+
+        def try_verify():
+            if (code_entry.get() == str(self.__random_code)) and (password_entry.get() == self.__password.get()):
+                verification_result.set(True)
+                verification_frame.destroy()
+            else:
+                MyMessageBoxes.ShowMessage().show_error("Incorrect details.\nRetry or go back.")
+
+        self.parent.wait_variable(verification_result)  # Block until `verification_result` is set
+        return verification_result.get()
+
+    def email_user(self, email_subject, email_body):
         try:
             with smtplib.SMTP("smtp.mailersend.net", 587) as server:
                 sender_email = "MS_AElKUp@trial-k68zxl2x8k9gj905.mlsender.net"
                 sender_pass = "T1vHXqPbVSwTndFU"
                 receiver_email = str(self.__email.get())
 
-                subject = "Verification Code"
+                subject = email_subject
                 verification_code = random.randint(100000, 999999)
-                body = f"Enter the following verification code into the box: {verification_code}."
+                body = email_body
 
                 msg = MIMEMultipart()
                 msg['From'] = sender_email
@@ -203,17 +224,6 @@ class CreateAccount:
         except Exception as e:
             MyMessageBoxes.ShowMessage().show_error(f"Error: {e}")
 
-        def go_back():
-            verification_result.set(False)
-            verification_frame.destroy()
-
-        def try_verify():
-            if (code_entry.get() == str(verification_code)) and (password_entry.get() == self.__password.get()):
-                verification_result.set(True)
-                verification_frame.destroy()
-
-        self.parent.wait_variable(verification_result)  # Block until `verification_result` is set
-        return verification_result.get()
 
 
 if __name__ == '__main__':

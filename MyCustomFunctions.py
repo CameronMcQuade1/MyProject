@@ -40,12 +40,12 @@ class ShowHidePasswordText:
 
 class ShowHidePasswordWidget:
     def __init__(self, parent, target, place_x, place_y):
-        password_hidden_image_path = "PasswordHiddenImage.png"
+        password_hidden_image_path = "ProjectImages/PasswordHiddenImage.png"
         password_hidden_image = Image.open(password_hidden_image_path)
         password_hidden_image = password_hidden_image.resize((20, 20))  # Resize to fit button
         password_hidden_image = ctk.CTkImage(light_image=password_hidden_image, size=(20, 20))
         # Image which is shown when the password is shown
-        password_shown_image_path = "PasswordShownImage.png"
+        password_shown_image_path = "ProjectImages/PasswordShownImage.png"
         password_shown_image = Image.open(password_shown_image_path)
         password_shown_image = password_shown_image.resize((20, 20))  # Resize to fit button
         password_shown_image = ctk.CTkImage(light_image=password_shown_image, size=(20, 20))

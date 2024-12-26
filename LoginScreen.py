@@ -53,7 +53,7 @@ class MainLogin:
         self.forgot_pass.place(relx=0.5, rely=0.85, anchor='center')
 
         # Event binding for custom placeholder text and show/hide password functionality
-        EntryPlaceHolderText(self.login_screen, self.enter_username, 'Username')
+        EntryPlaceHolderText(self.login_screen, self.enter_username, 'Account ID')
         EntryPlaceHolderText(self.login_screen, self.enter_password, 'Password')
 
     def try_login(self):
@@ -70,7 +70,7 @@ class MainLogin:
             else:
                 MyMessageBoxes.ShowMessage().show_warning("Password is incorrect")
         else:
-            MyMessageBoxes.ShowMessage().show_error("Username is incorrect")
+            MyMessageBoxes.ShowMessage().show_error("Account ID is incorrect")
 
     def new_password(self):
         # Implementation for new password functionality

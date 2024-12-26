@@ -2,7 +2,6 @@ import mysql.connector
 import customtkinter as ctk
 from tkinter import ttk
 from openpyxl import Workbook
-from openpyxl.styles import Alignment
 from pathlib import Path
 from datetime import datetime
 import MyMessageBoxes
@@ -151,11 +150,17 @@ class AccountsDatabase:
     def return_expenses_from_user(self, current_user):
         try:
             cursor = self.main_db.cursor(dictionary=True)
-            cursor.execute("""
-                SELECT ExpenseID, Type, Quantity, Price, Date 
-                FROM ExpenseTable 
-                WHERE UserID = %s
-            """, (current_user,))
+            if self.check_user_level(current_user) == 0:
+                cursor.execute("""
+                    SELECT ExpenseID, Type, Quantity, Price, Date 
+                    FROM ExpenseTable 
+                    WHERE UserID = %s
+                """, (current_user,))
+            else:
+                cursor.execute("""
+                                    SELECT ExpenseID, Type, Quantity, Price, Date 
+                                    FROM ExpenseTable 
+                                """)
             expenses = cursor.fetchall()
             self.main_db.commit()
             cursor.close()
@@ -166,12 +171,19 @@ class AccountsDatabase:
     def return_total_inputted_from_user(self, current_user):
         try:
             cursor = self.main_db.cursor()
-            query = """
-                SELECT COUNT(*) AS total_expenses
-                FROM ExpenseTable
-                WHERE UserID = %s;
-            """
-            cursor.execute(query, (current_user,))
+            if self.check_user_level(current_user) == 0:
+                query = """
+                    SELECT COUNT(*) AS total_expenses
+                    FROM ExpenseTable
+                    WHERE UserID = %s;
+                """
+                cursor.execute(query, (current_user,))
+            else:
+                query = """
+                    SELECT COUNT(*) AS total_expenses
+                    FROM ExpenseTable
+                """
+                cursor.execute(query)
             result = cursor.fetchone()
             cursor.close()
             return result[0] if result else 0
@@ -195,13 +207,21 @@ class AccountsDatabase:
         """
         try:
             cursor = self.main_db.cursor(dictionary=True)
-            query = """
-                SELECT Date, Type, SUM(Price * Quantity) AS TotalAmount
-                FROM ExpenseTable
-                WHERE UserID = %s
-                GROUP BY Date, Type;
-            """
-            cursor.execute(query, (current_user,))
+            if self.check_user_level(current_user) == 0:
+                query = """
+                    SELECT Date, Type, SUM(Price * Quantity) AS TotalAmount
+                    FROM ExpenseTable
+                    WHERE UserID = %s
+                    GROUP BY Date, Type;
+                """
+                cursor.execute(query, (current_user,))
+            else:
+                query = """
+                                    SELECT Date, Type, SUM(Price * Quantity) AS TotalAmount
+                                    FROM ExpenseTable
+                                    GROUP BY Date, Type;
+                                """
+                cursor.execute(query)
             results = cursor.fetchall()
             cursor.close()
 
@@ -396,4 +416,4 @@ class ExpenseExcelSpreadsheet:
 
 
 if __name__ == '__main__':
-    AccountsDatabase()
+    print(AccountsDatabase().get_expenses_by_type("CM0000"))

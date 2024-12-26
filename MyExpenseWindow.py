@@ -58,22 +58,22 @@ class DefaultWindow:
         expenses_tab = self.nb.tab("Expenses")
 
         #  Initialising the icons for widgets
-        green_plus_image_path = "GreenPlusImage.png"
+        green_plus_image_path = "ProjectImages/GreenPlusImage.png"
         green_plus_image = Image.open(green_plus_image_path)
         green_plus_image = green_plus_image.resize((60, 60))  # Resize to fit button
         green_plus_image = ctk.CTkImage(light_image=green_plus_image, size=(60, 60))
 
-        red_remove_image_path = "RedRemoveImage.png"
+        red_remove_image_path = "ProjectImages/RedRemoveImage.png"
         red_remove_image = Image.open(red_remove_image_path)
         red_remove_image = red_remove_image.resize((60, 60))  # Resize to fit button
         red_remove_image = ctk.CTkImage(light_image=red_remove_image, size=(60, 60))
 
-        download_file_image_path = "DownloadFileImage.png"
+        download_file_image_path = "ProjectImages/DownloadFileImage.png"
         download_file_image = Image.open(download_file_image_path)
         download_file_image = download_file_image.resize((60, 60))  # Resize to fit button
         download_file_image = ctk.CTkImage(light_image=download_file_image, size=(60, 60))
 
-        spreadsheet_image_path = "SpreadsheetImage.png"
+        spreadsheet_image_path = "ProjectImages/SpreadsheetImage.png"
         spreadsheet_image = Image.open(spreadsheet_image_path)
         spreadsheet_image = spreadsheet_image.resize((60, 60))  # Resize to fit button
         spreadsheet_image = ctk.CTkImage(light_image=spreadsheet_image, size=(60, 60))
@@ -81,10 +81,18 @@ class DefaultWindow:
         # Label for total expenses from current user
         total_expenses_from_user = self.main_db.return_total_inputted_from_user(self.current_user)
         total_expenses_summed = self.main_db.return_expenses_summed(self.current_user)
-        self.expense_view_label = ctk.CTkLabel(expenses_tab, text=f"Total Expenses From User '{self.current_user}':\n"
-                                                                  f"{total_expenses_from_user} Expenses, Totalling £"
-                                                                  f"{total_expenses_summed}.",
-                                               font=("Arial", 18))
+        if self.main_db.check_user_level(self.current_user) == 0:
+            self.expense_view_label = ctk.CTkLabel(expenses_tab, text=f"User {self.current_user}:\n"
+                                                                      f"{total_expenses_from_user} Expenses,"
+                                                                      f" Equating £"
+                                                                      f"{total_expenses_summed}.",
+                                                   font=("Arial", 18))
+        else:
+            self.expense_view_label = ctk.CTkLabel(expenses_tab, text=f"Admin User {self.current_user}:\n"
+                                                                      f"{total_expenses_from_user} Total Expenses,"
+                                                                      f" Equating £"
+                                                                      f"{total_expenses_summed}.",
+                                                   font=("Arial", 18))
         self.expense_view_label.place(x=300, y=20)  # Adjust coordinates as needed
 
         # Add Expense button
@@ -266,9 +274,6 @@ class DefaultWindow:
             self.show_main_window(parent)
         except Exception as error:
             MyMessageBoxes.ShowMessage.show_info(f"Something went wrong: {str(error)}")
-
-    def create_income_tab(self):
-        pass
 
     def create_graphs_tab(self):
         """
@@ -568,7 +573,8 @@ class DefaultWindow:
 
     def create_predictor_tab(self):
         """
-        Creates the 'Plotter' tab in the notebook to predict future expenses using historical data and display them on a graph.
+        Creates the 'Plotter' tab in the notebook to predict future
+        expenses using historical data and display them on a graph.
         """
 
         # Create the Plotter tab and its main frame
@@ -687,8 +693,73 @@ class DefaultWindow:
 class AdminWindow(DefaultWindow):
     def __init__(self, parent, current_user):
         super().__init__(parent, current_user)
+        self.expense_view_label.place(x=300, y=20)  # Adjust coordinates as needed
         self.nb.add("Income")
         self.nb.add("Accounts")
+        self.setup_extra_tabs()
+
+    def setup_extra_tabs(self):
+        self.create_income_tab()
+        self.create_accounts_tab()
+
+    def create_income_tab(self):
+        pass
+
+    def create_accounts_tab(self):
+        accounts_tab = self.nb.tab("Accounts")
+
+        add_user_image_path = "ProjectImages/AddUserImage.png"
+        add_user_image = Image.open(add_user_image_path)
+        add_user_image = add_user_image.resize((60, 60))  # Resize to fit button
+        add_user_image = ctk.CTkImage(light_image=add_user_image, size=(80, 75))
+
+        remove_user_image_path = "ProjectImages/RemoveUserImage.png"
+        remove_user_image = Image.open(remove_user_image_path)
+        remove_user_image = remove_user_image.resize((60, 60))
+        remove_user_image = ctk.CTkImage(light_image=remove_user_image, size=(80, 75))
+
+        edit_user_image_path = "ProjectImages/EditUserImage.png"
+        edit_user_image = Image.open(edit_user_image_path)
+        edit_user_image = edit_user_image.resize((60, 60))
+        edit_user_image = ctk.CTkImage(light_image=edit_user_image, size=(80, 75))
+
+        view_users_image_path = "ProjectImages/ViewUsersImage.png"
+        view_users_image = Image.open(view_users_image_path)
+        view_users_image = view_users_image.resize((60, 60))
+        view_users_image = ctk.CTkImage(light_image=view_users_image, size=(80, 75))
+
+        add_user_button = ctk.CTkButton(accounts_tab, image=add_user_image, command=self.add_new_user,
+                                        width=200, height=100, text="Add User", compound="bottom",
+                                        font=("Arial", 16))
+        add_user_button.place(x=175, y=100)
+
+        remove_user_button = ctk.CTkButton(accounts_tab, image=remove_user_image, command=self.remove_user,
+                                           width=200, height=100, text="Remove User", compound="bottom",
+                                           font=("Arial", 16))
+        remove_user_button.place(x=450, y=100)
+
+        edit_user_button = ctk.CTkButton(accounts_tab, image=edit_user_image, command=self.edit_user,
+                                        width=200, height=100, text="Edit User", compound="bottom",
+                                        font=("Arial", 16))
+        edit_user_button.place(x=175, y=250)
+
+        view_users_button = ctk.CTkButton(accounts_tab, image=view_users_image, command=self.view_users,
+                                         width=200, height=100, text="View Users", compound="bottom",
+                                         font=("Arial", 16))
+        view_users_button.place(x=450, y=250)
+
+
+    def add_new_user(self):
+        pass
+
+    def remove_user(self):
+        pass
+
+    def edit_user(self):
+        pass
+
+    def view_users(self):
+        pass
 
 
 if __name__ == '__main__':
@@ -699,6 +770,6 @@ if __name__ == '__main__':
     root.title("Expense Tracker")
     root.geometry('850x525+425+175')
     root.resizable(False, False)
-    account_frame = (DefaultWindow
+    account_frame = (AdminWindow
                      (root, "CM0000"))
     root.mainloop()

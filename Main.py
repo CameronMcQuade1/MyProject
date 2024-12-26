@@ -35,9 +35,10 @@ class MainApp:
     def centre_window(target, width, height):
         screen_width = target.winfo_screenwidth()
         screen_height = target.winfo_screenheight()
-        centre_x = (screen_width / 2) - (width / 2)
+        centre_x = (screen_height / 2) - (width / 2)
         centre_y = (screen_height / 2) - (height / 2)
         target.geometry('%dx%d+%d+%d' % (width, height, centre_x, centre_y))
+        target.resizable(False, False)
 
     def menu_bar(self):
         main_bar = tk.Menu()

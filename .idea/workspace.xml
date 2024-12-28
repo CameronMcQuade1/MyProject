@@ -4,9 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4223b0cb-600c-4d4d-bb0c-1363f4ef671e" name="Changes" comment="Updating progress">
+    <list default="true" id="4223b0cb-600c-4d4d-bb0c-1363f4ef671e" name="Changes" comment="Created accounts tab with working &quot;add user&quot; button">
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CreateAccountScreen.py" beforeDir="false" afterPath="$PROJECT_DIR$/CreateAccountScreen.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MyDatabase.py" beforeDir="false" afterPath="$PROJECT_DIR$/MyDatabase.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MyExpenseWindow.py" beforeDir="false" afterPath="$PROJECT_DIR$/MyExpenseWindow.py" afterDir="false" />
     </list>
@@ -694,7 +694,8 @@
       <workItem from="1735256170131" duration="446000" />
       <workItem from="1735324790486" duration="4010000" />
       <workItem from="1735379791456" duration="429000" />
-      <workItem from="1735407716111" duration="2602000" />
+      <workItem from="1735407716111" duration="6689000" />
+      <workItem from="1735424356524" duration="3223000" />
     </task>
     <task id="LOCAL-00001" summary="created my_message_boxes">
       <option name="closed" value="true" />
@@ -952,7 +953,31 @@
       <option name="project" value="LOCAL" />
       <updated>1735256587010</updated>
     </task>
-    <option name="localTasksCounter" value="33" />
+    <task id="LOCAL-00033" summary="Made exit button go back to accounts tab in AdminWindow">
+      <option name="closed" value="true" />
+      <created>1735410891335</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1735410891335</updated>
+    </task>
+    <task id="LOCAL-00034" summary="Added method to return all users">
+      <option name="closed" value="true" />
+      <created>1735410910037</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1735410910037</updated>
+    </task>
+    <task id="LOCAL-00035" summary="Created accounts tab with working &quot;add user&quot; button">
+      <option name="closed" value="true" />
+      <created>1735410943334</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1735410943334</updated>
+    </task>
+    <option name="localTasksCounter" value="36" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1004,19 +1029,22 @@
     <MESSAGE value="Fixed bugs" />
     <MESSAGE value="Started admin window and fixed bugs from default window" />
     <MESSAGE value="Updating progress" />
-    <option name="LAST_COMMIT_MESSAGE" value="Updating progress" />
+    <MESSAGE value="Made exit button go back to accounts tab in AdminWindow" />
+    <MESSAGE value="Added method to return all users" />
+    <MESSAGE value="Created accounts tab with working &quot;add user&quot; button" />
+    <option name="LAST_COMMIT_MESSAGE" value="Created accounts tab with working &quot;add user&quot; button" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/MyProject$MyMessageBoxes.coverage" NAME="MyMessageBoxes Coverage Results" MODIFIED="1731255098701" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MyProject$MyAccountsDatabase.coverage" NAME="MyAccountsDatabase Coverage Results" MODIFIED="1721296196057" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/MyProject$MyDatabase.coverage" NAME="MyDatabase Coverage Results" MODIFIED="1735246838130" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MyProject$MyDatabase.coverage" NAME="MyDatabase Coverage Results" MODIFIED="1735426243742" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MyProject$ctkmessagebox.coverage" NAME="ctkmessagebox Coverage Results" MODIFIED="1730290129783" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/venv/Lib/site-packages/CTkMessagebox" />
     <SUITE FILE_PATH="coverage/MyProject$LoginScreen.coverage" NAME="LoginScreen Coverage Results" MODIFIED="1735038031161" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/MyProject$MyExpenseWindow.coverage" NAME="MyExpenseWindow Coverage Results" MODIFIED="1735409051083" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MyProject$MyExpenseWindow.coverage" NAME="MyExpenseWindow Coverage Results" MODIFIED="1735427553977" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MyProject$.coverage" NAME=" Coverage Results" MODIFIED="1718014623098" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MyProject$test.coverage" NAME="test Coverage Results" MODIFIED="1730288200908" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MyProject$PasswordHasher.coverage" NAME="PasswordHasher Coverage Results" MODIFIED="1731246795743" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/MyProject$CreateAccountScreen.coverage" NAME="CreateAccountScreen Coverage Results" MODIFIED="1735379890371" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MyProject$CreateAccountScreen.coverage" NAME="CreateAccountScreen Coverage Results" MODIFIED="1735412792786" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MyProject$MainExpenseWindow.coverage" NAME="MainExpenseWindow Coverage Results" MODIFIED="1726158475038" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MyProject$MyCustomFunctions.coverage" NAME="MyCustomFunctions Coverage Results" MODIFIED="1730375649897" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MyProject$Main.coverage" NAME="Main Coverage Results" MODIFIED="1735244896071" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

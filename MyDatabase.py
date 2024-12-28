@@ -259,7 +259,7 @@ class AccountsDatabase:
 
     def return_all_users(self):
         try:
-            cursor = self.main_db.cursor()
+            cursor = self.main_db.cursor(dictionary=True)
             query = """
                     SELECT usertable.UserID, FirstName, LastName, Level, Salary
                     FROM usertable, salarytable
@@ -272,61 +272,92 @@ class AccountsDatabase:
         except Exception as given_error:
             return given_error
 
+    def remove_given_users(self, given_user_ids):
+        try:
+            cursor = self.main_db.cursor()
+            format_strings = ','.join(['%s'] * len(given_user_ids))
+            query1 = f"DELETE FROM UserTable WHERE UserID IN ({format_strings})"
+            cursor.execute(query1, tuple(given_user_ids))
+            query2 = f"DELETE FROM salarytable WHERE UserID IN ({format_strings})"
+            cursor.execute(query2, tuple(given_user_ids))
+            self.main_db.commit()
+            cursor.close()
+            return f"Successfully deleted {len(given_user_ids)} User ID(s)."
+        except Exception as e:
+            return f"Error occurred while removing users: {e}"
+
 
 class ExpenseViewer:
-    def __init__(self, user_id, parent, submit_frame, on_remove_callback):
+    def __init__(self, user_id, parent, submit_frame, on_remove_callback, show_users=None):
         self.__parent = parent
         self.spreadsheet_frame = ctk.CTkFrame(parent)
         self.spreadsheet_frame.pack(expand=True, fill='both')
         self.db = AccountsDatabase()
         self.user_id = user_id
-        self.expenses = self.db.return_expenses_from_user(self.user_id)
+        self.show_users = show_users if show_users else None
+        if self.show_users:
+            self.information = self.db.return_all_users()
+        else:
+            self.information = self.db.return_expenses_from_user(self.user_id)
 
         # Store the callback function
         self.on_remove_callback = on_remove_callback
 
-        if self.expenses:
+        if self.information:
             # Scrollable frame for spreadsheet-like display
             self.scrollable_frame = ctk.CTkScrollableFrame(self.spreadsheet_frame, width=580, height=300)
             self.scrollable_frame.pack(fill="both", expand=True)
 
             # Column headers
-            headers = ["Select", "ExpenseID", "Quantity", "Price", "Date"]
+            headers = ["Select", "ExpenseID", "Quantity", "Price", "Date"] if not self.show_users else ["UserID", "FirstName", "LastName", "Level", "Salary"]
             for col, header in enumerate(headers):
                 label = ctk.CTkLabel(self.scrollable_frame, text=header, font=("Arial", 14, "bold"))
                 label.grid(row=0, column=col, padx=10, pady=5)
 
             # Display expenses with checkboxes
-            self.expense_checkboxes = []
-            self.display_expenses()
+            self.information_checkboxes = []
+            self.display_information()
 
             # Submit button to handle selected expenses
             self.submit_button = ctk.CTkButton(submit_frame, text="Submit",
-                                               command=self.get_selected_expenses)
+                                               command=self.get_selected_information)
             self.submit_button.pack(expand=True, side='right')
         else:
             ctk.CTkLabel(self.spreadsheet_frame, text="No expenses found from your user.\n Only admins can see all "
                                                       "expenses.").place(x=100, y=100)
 
-    def display_expenses(self):
-        for row, expense in enumerate(self.expenses, start=1):
+    def display_information(self):
+        for row, info in enumerate(self.information, start=1):
             # Checkbox for each expense
             checkbox_var = ctk.BooleanVar()
             checkbox = ctk.CTkCheckBox(self.scrollable_frame, variable=checkbox_var, text="")
             checkbox.grid(row=row, column=0, padx=10, pady=5)
-            self.expense_checkboxes.append((checkbox_var, expense["ExpenseID"]))
+            if not self.show_users:
+                self.information_checkboxes.append((checkbox_var, info["ExpenseID"]))
 
-            # Labels for each data column
-            ctk.CTkLabel(self.scrollable_frame, text=str(expense["ExpenseID"])).grid(row=row, column=1, padx=10)
-            ctk.CTkLabel(self.scrollable_frame, text=str(expense["Quantity"])).grid(row=row, column=2, padx=10)
-            ctk.CTkLabel(self.scrollable_frame, text=f"${expense['Price']:.2f}").grid(row=row, column=3, padx=10)
-            ctk.CTkLabel(self.scrollable_frame, text=str(expense["Date"])).grid(row=row, column=4, padx=10)
+                # Labels for each data column
+                ctk.CTkLabel(self.scrollable_frame, text=str(info["ExpenseID"])).grid(row=row, column=1, padx=10)
+                ctk.CTkLabel(self.scrollable_frame, text=str(info["Quantity"])).grid(row=row, column=2, padx=10)
+                ctk.CTkLabel(self.scrollable_frame, text=f"${info['Price']:.2f}").grid(row=row, column=3, padx=10)
+                ctk.CTkLabel(self.scrollable_frame, text=str(info["Date"])).grid(row=row, column=4, padx=10)
+            else:
+                self.information_checkboxes.append((checkbox_var, info["UserID"]))
 
-    def get_selected_expenses(self):
-        selected_expenses = [expense_id for var, expense_id in self.expense_checkboxes if var.get()]
+                # Labels for each data column
+                ctk.CTkLabel(self.scrollable_frame, text=str(info["UserID"])).grid(row=row, column=1, padx=10)
+                ctk.CTkLabel(self.scrollable_frame, text=str(info["FirstName"])).grid(row=row, column=2, padx=10)
+                ctk.CTkLabel(self.scrollable_frame, text=str(info['LastName'])).grid(row=row, column=3, padx=10)
+                ctk.CTkLabel(self.scrollable_frame, text=str(info["Level"])).grid(row=row, column=4, padx=10)
+                ctk.CTkLabel(self.scrollable_frame, text=str(info["Salary"])).grid(row=row, column=4, padx=10)
+
+    def get_selected_information(self):
         try:
-            # Attempt to remove the selected expenses from the database
-            remove_expenses = AccountsDatabase().remove_given_expenses(selected_expenses)
+            if self.show_users:
+                selected_information = [user_id for var, user_id in self.information_checkboxes if var.get()]
+            else:
+                selected_information = [expense_id for var, expense_id in self.information_checkboxes if var.get()]
+                # Attempt to remove the selected expenses from the database
+            remove_expenses = AccountsDatabase().remove_given_expenses(selected_information) if not self.show_users else AccountsDatabase().remove_given_users(selected_information)
             MyMessageBoxes.ShowMessage().show_info(remove_expenses)
 
             self.on_remove_callback()
@@ -341,13 +372,13 @@ class ExpenseExcelSpreadsheet:
         self.db = AccountsDatabase()
         self.user_id = user_id
         self.year = year
-        self.expenses = self.get_expenses()  # Fetch expenses based on the year filter
+        self.information = self.get_expenses()  # Fetch expenses based on the year filter
 
         # Frame for the Treeview display
         self.excel_spreadsheet_frame = ctk.CTkFrame(self.parent)
         self.excel_spreadsheet_frame.pack(fill="both", expand=True)
 
-        if self.expenses:
+        if self.information:
             # Treeview setup for displaying expenses
             self.tree = ttk.Treeview(self.excel_spreadsheet_frame, columns=("ExpenseID", "Quantity", "Price",
                                                                             "Type", "Date"),
@@ -379,7 +410,7 @@ class ExpenseExcelSpreadsheet:
 
     def display_expenses(self):
         """Populate the Treeview with expense data."""
-        for expense in self.expenses:
+        for expense in self.information:
             if isinstance(expense, dict):  # Ensure each row is a dictionary
                 self.tree.insert(
                     "", "end",
@@ -399,7 +430,7 @@ class ExpenseExcelSpreadsheet:
 
     def download_expenses(self):
         """Export the displayed expenses to an Excel spreadsheet."""
-        if self.expenses:
+        if self.information:
             workbook = Workbook()
             sheet = workbook.active
             sheet.column_dimensions['A'].width = 10
@@ -414,7 +445,7 @@ class ExpenseExcelSpreadsheet:
             sheet.append(headers)
 
             # Add expense data rows to the sheet
-            for expense in self.expenses:
+            for expense in self.information:
                 sheet.append([expense["ExpenseID"], expense["Quantity"], expense["Price"],
                               expense["Type"], expense["Date"]])
 
@@ -431,4 +462,4 @@ class ExpenseExcelSpreadsheet:
 
 
 if __name__ == '__main__':
-    print(AccountsDatabase().return_all_users())
+    AccountsDatabase().return_all_users()

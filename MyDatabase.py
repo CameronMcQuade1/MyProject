@@ -257,6 +257,21 @@ class AccountsDatabase:
         except Exception as e:
             raise f"Error occurred while removing expenses: {e}"
 
+    def return_all_users(self):
+        try:
+            cursor = self.main_db.cursor()
+            query = """
+                    SELECT usertable.UserID, FirstName, LastName, Level, Salary
+                    FROM usertable, salarytable
+                    WHERE salarytable.UserID = usertable.UserID
+                """
+            cursor.execute(query)
+            results = cursor.fetchall()
+            cursor.close()
+            return results
+        except Exception as given_error:
+            return given_error
+
 
 class ExpenseViewer:
     def __init__(self, user_id, parent, submit_frame, on_remove_callback):
@@ -416,4 +431,4 @@ class ExpenseExcelSpreadsheet:
 
 
 if __name__ == '__main__':
-    print(AccountsDatabase().get_expenses_by_type("CM0000"))
+    print(AccountsDatabase().return_all_users())

@@ -10,6 +10,7 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import CreateAccountScreen
 import MyMessageBoxes
 import MyCustomFunctions
 import MyDatabase
@@ -36,7 +37,6 @@ class DefaultWindow:
         self.nb.add("Graphs")
         self.nb.add("Table")
         self.nb.add("Predictor")
-        self.nb.set("Expenses")
 
         self.setup_expense_window()
 
@@ -52,6 +52,9 @@ class DefaultWindow:
     def show_main_window(self, target):
         target.withdraw()
         self.parent.deiconify()
+
+    def set_current_tab(self, nb_tab):
+        self.nb.set(nb_tab)
 
     def create_expenses_tab(self):
         # Access the "Expenses" tab directly
@@ -691,11 +694,11 @@ class DefaultWindow:
 
 
 class AdminWindow(DefaultWindow):
-    def __init__(self, parent, current_user):
+    def __init__(self, parent, current_user, current_tab=None):
         super().__init__(parent, current_user)
-        self.expense_view_label.place(x=300, y=20)  # Adjust coordinates as needed
         self.nb.add("Income")
         self.nb.add("Accounts")
+        self.nb.set(current_tab) if current_tab else None
         self.setup_extra_tabs()
 
     def setup_extra_tabs(self):
@@ -739,18 +742,18 @@ class AdminWindow(DefaultWindow):
         remove_user_button.place(x=450, y=100)
 
         edit_user_button = ctk.CTkButton(accounts_tab, image=edit_user_image, command=self.edit_user,
-                                        width=200, height=100, text="Edit User", compound="bottom",
-                                        font=("Arial", 16))
+                                         width=200, height=100, text="Edit User", compound="bottom",
+                                         font=("Arial", 16))
         edit_user_button.place(x=175, y=250)
 
         view_users_button = ctk.CTkButton(accounts_tab, image=view_users_image, command=self.view_users,
-                                         width=200, height=100, text="View Users", compound="bottom",
-                                         font=("Arial", 16))
+                                          width=200, height=100, text="View Users", compound="bottom",
+                                          font=("Arial", 16))
         view_users_button.place(x=450, y=250)
 
-
     def add_new_user(self):
-        pass
+        self.root.destroy()
+        CreateAccountScreen.CreateAccount(self.parent, self.current_user)
 
     def remove_user(self):
         pass

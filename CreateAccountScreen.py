@@ -1,5 +1,6 @@
 import customtkinter as ctk
 import LoginScreen
+import MyExpenseWindow
 import MyCustomFunctions
 import MyDatabase
 import MyMessageBoxes
@@ -12,9 +13,11 @@ from email.mime.multipart import MIMEMultipart
 
 
 class CreateAccount:
-    def __init__(self, parent):
+    def __init__(self, parent, current_user=None):
         self.parent = parent
-        self.create_account_screen = ctk.CTkFrame(parent)
+        self.current_user = current_user
+        self.parent.geometry("325x175+750+250")
+        self.create_account_screen = ctk.CTkFrame(self.parent)
 
         self.frames = []
 
@@ -82,7 +85,7 @@ class CreateAccount:
         self.frames.append(self.details_frame)
 
         # Create the "Next" and "Back" buttons
-        self.name_exit_button = ctk.CTkButton(self.name_frame, text="Exit", command=self.parent.destroy, width=80)
+        self.name_exit_button = ctk.CTkButton(self.name_frame, text="Exit", command=self.exit_button_return, width=80)
         self.name_exit_button.place(anchor="center", relx=0.365, rely=0.9)
 
         self.name_next_button = ctk.CTkButton(self.name_frame, text="Next", command=self.next_frame, width=80)
@@ -99,6 +102,17 @@ class CreateAccount:
         for frame in self.frames:
             frame.pack_forget()
         self.frames[index].pack(expand=True, fill="both")
+
+    def exit_button_return(self):
+        self.create_account_screen.destroy()
+        self.parent.geometry('850x525+425+175')
+        if self.current_user:
+            if MyDatabase.AccountsDatabase().check_user_level(self.current_user) == 1:
+                MyExpenseWindow.AdminWindow(self.parent, self.current_user, "Accounts")
+            else:
+                MyExpenseWindow.DefaultWindow(self.parent, self.current_user)
+
+
 
     def next_frame(self):
         if self.current_frame_index < len(self.frames) - 1:
@@ -231,5 +245,5 @@ if __name__ == '__main__':
     ctk.set_default_color_theme("blue")  # Optional: Set color theme
     root = ctk.CTk()
     root.geometry("325x175+750+250")
-    CreateAccount(root)
+    CreateAccount(root, "CM0000")
     root.mainloop()

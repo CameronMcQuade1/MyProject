@@ -756,7 +756,22 @@ class AdminWindow(DefaultWindow):
         CreateAccountScreen.CreateAccount(self.parent, self.current_user)
 
     def remove_user(self):
-        pass
+        self.remove_main_window()
+        self.remove_user_window = ctk.CTk()
+        self.remove_user_frame = ctk.CTkFrame(self.remove_user_window)
+        self.remove_user_frame.pack(expand=True, fill="both")
+        self.remove_user_window.title("Remove User(s)")
+        self.remove_user_window.geometry("550x340+710+200")
+        self.remove_user_window.resizable(False, False)
+        self.user_spreadsheet = MyDatabase.ExpenseViewer(self.current_user, self.remove_user_frame,
+                                                         self.remove_user_frame,
+                                                         lambda: self.show_main_window(self.remove_user_window),
+                                                         True)
+        back_button = ctk.CTkButton(self.remove_user_frame, text="Back",
+                                    command=lambda: self.show_main_window(self.remove_user_window), width=140)
+        back_button.pack(expand=True, side='left')
+
+        self.remove_user_window.mainloop()
 
     def edit_user(self):
         pass

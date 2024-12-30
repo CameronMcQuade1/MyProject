@@ -49,8 +49,8 @@ class DefaultWindow:
     def remove_main_window(self):
         self.parent.withdraw()
 
-    def show_main_window(self, target):
-        target.withdraw()
+    def show_main_window(self, target=None):
+        target.withdraw() if target else None
         self.parent.deiconify()
 
     def set_current_tab(self, nb_tab):
@@ -112,14 +112,14 @@ class DefaultWindow:
 
         # Remove Expense button
         self.view_expenses_button = ctk.CTkButton(expenses_tab, image=spreadsheet_image, command=self.view_expenses,
-                                                  width=200, height=100, text="View Expenses", compound="bottom",
-                                                  font=("Arial", 16))
+                                                  width=200, height=100, text="View / Download Expenses",
+                                                  compound="bottom", font=("Arial", 16))
         self.view_expenses_button.place(x=175, y=250)
 
-        self.export_expenses_button = ctk.CTkButton(expenses_tab, image=download_file_image,
-                                                    command=self.export_expenses, width=200, height=100,
-                                                    text="Export Expenses", compound="bottom", font=("Arial", 16))
-        self.export_expenses_button.place(x=450, y=250)
+        self.edit_expense_button = ctk.CTkButton(expenses_tab, image=download_file_image,
+                                                 command=self.edit_expense, width=200, height=100,
+                                                 text="Edit Expense", compound="bottom", font=("Arial", 16))
+        self.edit_expense_button.place(x=450, y=250)
 
     def add_expense(self):
         # Create a new CTk window
@@ -198,11 +198,12 @@ class DefaultWindow:
     def remove_expense(self):
         # Create a new CTk window
         self.remove_main_window()
-        self.remove_expense_window = ctk.CTk()  # Or ctk.CTkToplevel(self.parent) to make it a child of the main window
+        self.remove_expense_window = ctk.CTk()
         self.remove_expense_frame = ctk.CTkFrame(self.remove_expense_window)
         self.remove_expense_frame.pack(expand=True, fill="both")
         self.remove_expense_window.title("Remove Expense(s)")
-        self.remove_expense_window.geometry("600x370+660+200")  # Customize the size
+        self.remove_expense_window.geometry("566x350+660+200")  # Customize the size
+        self.remove_expense_window.resizable(False, False)
 
         # Pass the callback function (show_main_window) to ExpenseViewer
         self.expense_spreadsheet = MyDatabase.ExpenseViewer(self.current_user, self.remove_expense_frame,
@@ -223,22 +224,25 @@ class DefaultWindow:
         self.view_expense_frame.pack(expand=True, fill="both")
         self.view_expense_window.title("View Expenses")
         self.view_expense_window.geometry("750x463+475+125")
-        self.excel_expense_spreadsheet = MyDatabase.ExpenseExcelSpreadsheet(self.current_user, self.view_expense_frame)
+        self.excel_expense_spreadsheet = MyDatabase.DisplayExcelSpreadsheet(self.current_user, self.view_expense_frame)
         back_button = ctk.CTkButton(self.view_expense_frame, text="Back",
-                                    command=lambda: self.show_main_window(self.view_expense_window), width=140)
-        back_button.place(x=15, y=250)
+                                    command=lambda: self.show_main_window(self.view_expense_window), width=200)
+        back_button.pack(padx=30, side='left')
+        download_button = ctk.CTkButton(self.view_expense_frame, text="Download",
+                                        command=lambda: self.export_expenses(), width=200)
+        download_button.pack(padx=30, side='right')
         self.view_expense_window.mainloop()
 
     def export_expenses(self):
         self.remove_main_window()
-        download_table = MyMessageBoxes.ShowMessage.ask_question("Are you sure you want to download? "
-                                                                 "Go to 'View Expenses' to see what you will"
-                                                                 " be downloading.",
-                                                                 "Cancel", "All years",
-                                                                 "Previous year")
+        download_table = MyMessageBoxes.ShowMessage.ask_question("Select which year's expenses you want to"
+                                                                 " download",
+                                                                 "All years", "Previous year",
+                                                                 "Back", "Back")
         if download_table == "All years":
             try:
-                MyDatabase.ExpenseExcelSpreadsheet(self.current_user, ctk.CTk()).download_expenses()
+                self.view_expense_window.destroy()
+                MyDatabase.DisplayExcelSpreadsheet(self.current_user, ctk.CTk()).download_expenses()
                 MyMessageBoxes.ShowMessage.show_info("Spreadsheet downloaded successfully.")
                 self.show_main_window(ctk.CTkToplevel())
             except Exception as error:
@@ -267,12 +271,13 @@ class DefaultWindow:
             cancel_button = ctk.CTkButton(year_toplevel, text="Back", command=lambda: (year_toplevel.destroy(),
                                                                                        self.export_expenses()))
             cancel_button.pack(expand=True, fill="both")
-        elif download_table == "Cancel":
-            self.show_main_window(ctk.CTkToplevel())
+
+    def edit_expense(self):
+        pass
 
     def download_expenses_for_year(self, year, parent):
         try:
-            MyDatabase.ExpenseExcelSpreadsheet(self.current_user, ctk.CTk(), year).download_expenses()
+            MyDatabase.DisplayExcelSpreadsheet(self.current_user, ctk.CTk(), year).download_expenses()
             MyMessageBoxes.ShowMessage.show_info(f"Spreadsheet for {year} downloaded successfully.")
             self.show_main_window(parent)
         except Exception as error:
@@ -741,15 +746,15 @@ class AdminWindow(DefaultWindow):
                                            font=("Arial", 16))
         remove_user_button.place(x=450, y=100)
 
-        edit_user_button = ctk.CTkButton(accounts_tab, image=edit_user_image, command=self.edit_user,
-                                         width=200, height=100, text="Edit User", compound="bottom",
-                                         font=("Arial", 16))
-        edit_user_button.place(x=175, y=250)
-
         view_users_button = ctk.CTkButton(accounts_tab, image=view_users_image, command=self.view_users,
                                           width=200, height=100, text="View Users", compound="bottom",
                                           font=("Arial", 16))
-        view_users_button.place(x=450, y=250)
+        view_users_button.place(x=175, y=250)
+
+        edit_user_button = ctk.CTkButton(accounts_tab, image=edit_user_image, command=self.edit_user,
+                                         width=200, height=100, text="Edit User", compound="bottom",
+                                         font=("Arial", 16))
+        edit_user_button.place(x=450, y=250)
 
     def add_new_user(self):
         self.root.destroy()
@@ -760,9 +765,9 @@ class AdminWindow(DefaultWindow):
         self.remove_user_window = ctk.CTk()
         self.remove_user_frame = ctk.CTkFrame(self.remove_user_window)
         self.remove_user_frame.pack(expand=True, fill="both")
-        self.remove_user_window.title("Remove User(s)")
-        self.remove_user_window.geometry("550x340+710+200")
         self.remove_user_window.resizable(False, False)
+        self.remove_user_window.title("Remove User(s)")
+        self.remove_user_window.geometry("850x525+475+125")
         self.user_spreadsheet = MyDatabase.ExpenseViewer(self.current_user, self.remove_user_frame,
                                                          self.remove_user_frame,
                                                          lambda: self.show_main_window(self.remove_user_window),
@@ -777,7 +782,18 @@ class AdminWindow(DefaultWindow):
         pass
 
     def view_users(self):
-        pass
+        self.remove_main_window()
+        self.view_users_window = ctk.CTk()
+        self.view_users_frame = ctk.CTkFrame(self.view_users_window)
+        self.view_users_frame.pack(expand=True, fill="both")
+        self.view_users_window.title("View Users")
+        self.view_users_window.geometry("1000x500+475+125")
+        self.view_users_window.resizable(False, False)
+        MyDatabase.DisplayExcelSpreadsheet(self.current_user, self.view_users_frame, year=None, show_users=True)
+        back_button = ctk.CTkButton(self.view_users_frame, text="Back",
+                                    command=lambda: self.show_main_window(self.view_users_window), width=140)
+        back_button.pack(expand=True, side='left')
+        self.view_users_window.mainloop()
 
 
 if __name__ == '__main__':

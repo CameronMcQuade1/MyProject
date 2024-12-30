@@ -11,9 +11,10 @@ class AccountsDatabase:
     def __init__(self):
         try:
             self.main_db = mysql.connector.connect(
-                host='127.0.0.1',
-                user='admin',
-                password='rcV])R%tN3YnS"b'
+                host='db4free.net',
+                database='expensedatabase',
+                username='expensedatabase',
+                password='&FNBra!4117LVv'
             )
             self.create_tables()
         except mysql.connector.errors.ProgrammingError as e:
@@ -25,9 +26,9 @@ class AccountsDatabase:
         db_cursor.execute("CREATE SCHEMA IF NOT EXISTS ExpenseDatabase")
         db_cursor.execute("USE ExpenseDatabase")
 
-        # Table 1: UserTable
+        # Table 1: usertable
         db_cursor.execute("""
-            CREATE TABLE IF NOT EXISTS UserTable (
+            CREATE TABLE IF NOT EXISTS usertable (
                 UserID VARCHAR(6) PRIMARY KEY,
                 FirstName CHAR(30) NOT NULL,
                 LastName CHAR(30) NOT NULL,
@@ -37,20 +38,20 @@ class AccountsDatabase:
             )
         """)
 
-        # Table 2: SalaryTable with One-to-One relationship with UserTable
+        # Table 2: salarytable with One-to-One relationship with usertable
         db_cursor.execute("""
-            CREATE TABLE IF NOT EXISTS SalaryTable (
+            CREATE TABLE IF NOT EXISTS salarytable (
                 UserID VARCHAR(6),
                 Level INT NOT NULL,
                 Salary INT NOT NULL,
                 PRIMARY KEY (UserID, Level),
-                FOREIGN KEY (UserID) REFERENCES UserTable(UserID) ON DELETE CASCADE
+                FOREIGN KEY (UserID) REFERENCES usertable(UserID) ON DELETE CASCADE
             )
         """)
 
-        # Table 3: ExpenseTable with One-to-Many relationship with UserTable
+        # Table 3: expensetable with One-to-Many relationship with usertable
         db_cursor.execute("""
-            CREATE TABLE IF NOT EXISTS ExpenseTable (
+            CREATE TABLE IF NOT EXISTS expensetable (
                 ExpenseID VARCHAR(6) PRIMARY KEY,
                 UserID VARCHAR(6),
                 Name VARCHAR(30) NOT NULL,
@@ -58,7 +59,7 @@ class AccountsDatabase:
                 Price DECIMAL(10, 2) NOT NULL,
                 Type VARCHAR(30) NOT NULL,
                 Date DATE NOT NULL,
-                FOREIGN KEY (UserID) REFERENCES UserTable(UserID) ON DELETE CASCADE
+                FOREIGN KEY (UserID) REFERENCES usertable(UserID) ON DELETE CASCADE
             )
         """)
 
@@ -73,7 +74,7 @@ class AccountsDatabase:
         try:
             cursor = self.main_db.cursor()  # Assuming `self.main_db` is the database connection
             query = """
-                    INSERT INTO ExpenseTable (ExpenseID, UserID, Name, Quantity, Price, Type, Date)
+                    INSERT INTO expensetable (ExpenseID, UserID, Name, Quantity, Price, Type, Date)
                     VALUES (%s, %s, %s, %s, %s, %s, %s)
                 """
             cursor.execute(query, expense_inputs)
@@ -87,13 +88,13 @@ class AccountsDatabase:
             cursor = self.main_db.cursor()
 
             first_query = """
-                       INSERT INTO UserTable (UserID, FirstName, LastName, Email, PhoneNumber, HashedPassword)
+                       INSERT INTO usertable (UserID, FirstName, LastName, Email, PhoneNumber, HashedPassword)
                        VALUES (%s, %s, %s, %s, %s, %s)
                    """
             cursor.execute(first_query, (user_id, first_name, last_name, email, phone_number, hashed_password))
 
             second_query = """
-                        INSERT INTO SalaryTable (UserID, Level, Salary) 
+                        INSERT INTO salarytable (UserID, Level, Salary) 
                         VALUES (%s, %s, %s)
             """
             cursor.execute(second_query, (user_id, level, salary))
@@ -107,7 +108,7 @@ class AccountsDatabase:
     def check_user_level(self, given_userid):
         try:
             db_cursor = self.main_db.cursor()
-            db_cursor.execute("SELECT LEVEL FROM SalaryTable WHERE UserID = %s",
+            db_cursor.execute("SELECT LEVEL FROM salarytable WHERE UserID = %s",
                               (given_userid,))
             user_level = db_cursor.fetchone()[0]
             return user_level
@@ -117,7 +118,7 @@ class AccountsDatabase:
     def check_user_exists(self, given_userid):
         try:
             db_cursor = self.main_db.cursor()
-            db_cursor.execute("SELECT HashedPassword FROM UserTable WHERE UserID = %s",
+            db_cursor.execute("SELECT HashedPassword FROM usertable WHERE UserID = %s",
                               (given_userid,))
             hashed_pass_from_user = db_cursor.fetchone()[0]
             return hashed_pass_from_user
@@ -129,7 +130,7 @@ class AccountsDatabase:
     def return_total_expense_amount(self):
         try:
             db_cursor = self.main_db.cursor()
-            db_cursor.execute("SELECT COUNT(*) FROM ExpenseTable")
+            db_cursor.execute("SELECT COUNT(*) FROM expensetable")
             count = db_cursor.fetchone()[0]
             db_cursor.close()
             return count
@@ -139,7 +140,7 @@ class AccountsDatabase:
     def return_account_amount(self):
         try:
             db_cursor = self.main_db.cursor()
-            db_cursor.execute("SELECT COUNT(*) FROM UserTable")
+            db_cursor.execute("SELECT COUNT(*) FROM usertable")
             count = db_cursor.fetchone()[0]  # Fetch the first element from the result tuple
             db_cursor.close()
             self.main_db.close()
@@ -152,14 +153,14 @@ class AccountsDatabase:
             cursor = self.main_db.cursor(dictionary=True)
             if self.check_user_level(current_user) == 0:
                 cursor.execute("""
-                    SELECT ExpenseID, Type, Quantity, Price, Date 
-                    FROM ExpenseTable 
+                    SELECT ExpenseID, UserID, Type, Quantity, Price, Date 
+                    FROM expensetable 
                     WHERE UserID = %s
                 """, (current_user,))
             else:
                 cursor.execute("""
-                                    SELECT ExpenseID, Type, Quantity, Price, Date 
-                                    FROM ExpenseTable 
+                                    SELECT ExpenseID, UserID, Type, Quantity, Price, Date 
+                                    FROM expensetable 
                                 """)
             expenses = cursor.fetchall()
             self.main_db.commit()
@@ -174,14 +175,14 @@ class AccountsDatabase:
             if self.check_user_level(current_user) == 0:
                 query = """
                     SELECT COUNT(*) AS total_expenses
-                    FROM ExpenseTable
+                    FROM expensetable
                     WHERE UserID = %s;
                 """
                 cursor.execute(query, (current_user,))
             else:
                 query = """
                     SELECT COUNT(*) AS total_expenses
-                    FROM ExpenseTable
+                    FROM expensetable
                 """
                 cursor.execute(query)
             result = cursor.fetchone()
@@ -210,7 +211,7 @@ class AccountsDatabase:
             if self.check_user_level(current_user) == 0:
                 query = """
                     SELECT Date, Type, SUM(Price * Quantity) AS TotalAmount
-                    FROM ExpenseTable
+                    FROM expensetable
                     WHERE UserID = %s
                     GROUP BY Date, Type;
                 """
@@ -218,7 +219,7 @@ class AccountsDatabase:
             else:
                 query = """
                                     SELECT Date, Type, SUM(Price * Quantity) AS TotalAmount
-                                    FROM ExpenseTable
+                                    FROM expensetable
                                     GROUP BY Date, Type;
                                 """
                 cursor.execute(query)
@@ -231,12 +232,12 @@ class AccountsDatabase:
             raise error
 
     def remove_given_expenses(self, given_expense_ids):
-        """Deletes expenses with the given expense_ids from the ExpenseTable."""
+        """Deletes expenses with the given expense_ids from the expensetable."""
         try:
             cursor = self.main_db.cursor()
 
             # Create the SQL DELETE query with placeholders
-            query = "DELETE FROM ExpenseTable WHERE ExpenseID IN (%s)"
+            query = "DELETE FROM expensetable WHERE ExpenseID IN (%s)"
 
             # Generate a string of placeholders for each expense_id
             format_strings = ','.join(['%s'] * len(given_expense_ids))
@@ -261,9 +262,23 @@ class AccountsDatabase:
         try:
             cursor = self.main_db.cursor(dictionary=True)
             query = """
-                    SELECT usertable.UserID, FirstName, LastName, Level, Salary
+                    SELECT usertable.UserID, FirstName, LastName, Email, PhoneNumber, Level, Salary
                     FROM usertable, salarytable
                     WHERE salarytable.UserID = usertable.UserID
+                """
+            cursor.execute(query)
+            results = cursor.fetchall()
+            cursor.close()
+            return results
+        except Exception as given_error:
+            return given_error
+
+    def return_all_expenses(self):
+        try:
+            cursor = self.main_db.cursor(dictionary=True)
+            query = """
+                    SELECT ExpenseID, UserID, Name, Quantity, Price, Type, Date
+                    FROM expensetable
                 """
             cursor.execute(query)
             results = cursor.fetchall()
@@ -276,7 +291,7 @@ class AccountsDatabase:
         try:
             cursor = self.main_db.cursor()
             format_strings = ','.join(['%s'] * len(given_user_ids))
-            query1 = f"DELETE FROM UserTable WHERE UserID IN ({format_strings})"
+            query1 = f"DELETE FROM usertable WHERE UserID IN ({format_strings})"
             cursor.execute(query1, tuple(given_user_ids))
             query2 = f"DELETE FROM salarytable WHERE UserID IN ({format_strings})"
             cursor.execute(query2, tuple(given_user_ids))
@@ -297,8 +312,10 @@ class ExpenseViewer:
         self.show_users = show_users if show_users else None
         if self.show_users:
             self.information = self.db.return_all_users()
-        else:
+        elif not self.show_users and self.db.check_user_level(user_id) == 0:
             self.information = self.db.return_expenses_from_user(self.user_id)
+        else:
+            self.information = self.db.return_all_expenses()
 
         # Store the callback function
         self.on_remove_callback = on_remove_callback
@@ -309,7 +326,12 @@ class ExpenseViewer:
             self.scrollable_frame.pack(fill="both", expand=True)
 
             # Column headers
-            headers = ["Select", "ExpenseID", "Quantity", "Price", "Date"] if not self.show_users else ["UserID", "FirstName", "LastName", "Level", "Salary"]
+            if self.show_users:
+                headers = ["Select", "UserID", "FirstName", "LastName", "Email", "PhoneNumber", "Level", "Salary"]
+            elif not self.show_users and self.db.check_user_level(self.user_id) == 0:
+                headers = ["Select", "ExpenseID", "Quantity", "Price", "Date"]
+            else:
+                headers = ["Select", "ExpenseID", "UserID", "Quantity", "Price", "Type", "Date"]
             for col, header in enumerate(headers):
                 label = ctk.CTkLabel(self.scrollable_frame, text=header, font=("Arial", 14, "bold"))
                 label.grid(row=0, column=col, padx=10, pady=5)
@@ -330,9 +352,9 @@ class ExpenseViewer:
         for row, info in enumerate(self.information, start=1):
             # Checkbox for each expense
             checkbox_var = ctk.BooleanVar()
-            checkbox = ctk.CTkCheckBox(self.scrollable_frame, variable=checkbox_var, text="")
+            checkbox = ctk.CTkCheckBox(self.scrollable_frame, variable=checkbox_var, text="", width=30)
             checkbox.grid(row=row, column=0, padx=10, pady=5)
-            if not self.show_users:
+            if not self.show_users and self.db.check_user_level(self.user_id) == 0:
                 self.information_checkboxes.append((checkbox_var, info["ExpenseID"]))
 
                 # Labels for each data column
@@ -340,6 +362,16 @@ class ExpenseViewer:
                 ctk.CTkLabel(self.scrollable_frame, text=str(info["Quantity"])).grid(row=row, column=2, padx=10)
                 ctk.CTkLabel(self.scrollable_frame, text=f"${info['Price']:.2f}").grid(row=row, column=3, padx=10)
                 ctk.CTkLabel(self.scrollable_frame, text=str(info["Date"])).grid(row=row, column=4, padx=10)
+            elif not self.show_users and self.db.check_user_level(self.user_id) == 1:
+                self.information_checkboxes.append((checkbox_var, info["ExpenseID"]))
+
+                # Labels for each data column
+                ctk.CTkLabel(self.scrollable_frame, text=str(info["ExpenseID"])).grid(row=row, column=1, padx=10)
+                ctk.CTkLabel(self.scrollable_frame, text=str(info["UserID"])).grid(row=row, column=2, padx=10)
+                ctk.CTkLabel(self.scrollable_frame, text=str(info["Quantity"])).grid(row=row, column=3, padx=10)
+                ctk.CTkLabel(self.scrollable_frame, text=f"${info['Price']:.2f}").grid(row=row, column=4, padx=10)
+                ctk.CTkLabel(self.scrollable_frame, text=str(info["Type"])).grid(row=row, column=5, padx=10)
+                ctk.CTkLabel(self.scrollable_frame, text=str(info["Date"])).grid(row=row, column=6, padx=10)
             else:
                 self.information_checkboxes.append((checkbox_var, info["UserID"]))
 
@@ -347,8 +379,10 @@ class ExpenseViewer:
                 ctk.CTkLabel(self.scrollable_frame, text=str(info["UserID"])).grid(row=row, column=1, padx=10)
                 ctk.CTkLabel(self.scrollable_frame, text=str(info["FirstName"])).grid(row=row, column=2, padx=10)
                 ctk.CTkLabel(self.scrollable_frame, text=str(info['LastName'])).grid(row=row, column=3, padx=10)
-                ctk.CTkLabel(self.scrollable_frame, text=str(info["Level"])).grid(row=row, column=4, padx=10)
-                ctk.CTkLabel(self.scrollable_frame, text=str(info["Salary"])).grid(row=row, column=4, padx=10)
+                ctk.CTkLabel(self.scrollable_frame, text=str(info['Email'])).grid(row=row, column=4, padx=10)
+                ctk.CTkLabel(self.scrollable_frame, text=str(info['PhoneNumber'])).grid(row=row, column=5, padx=10)
+                ctk.CTkLabel(self.scrollable_frame, text=str(info["Level"])).grid(row=row, column=6, padx=10)
+                ctk.CTkLabel(self.scrollable_frame, text=str(info["Salary"])).grid(row=row, column=7, padx=10)
 
     def get_selected_information(self):
         try:
@@ -357,7 +391,8 @@ class ExpenseViewer:
             else:
                 selected_information = [expense_id for var, expense_id in self.information_checkboxes if var.get()]
                 # Attempt to remove the selected expenses from the database
-            remove_expenses = AccountsDatabase().remove_given_expenses(selected_information) if not self.show_users else AccountsDatabase().remove_given_users(selected_information)
+            remove_expenses = AccountsDatabase().remove_given_expenses(selected_information) if not (
+                self.show_users) else AccountsDatabase().remove_given_users(selected_information)
             MyMessageBoxes.ShowMessage().show_info(remove_expenses)
 
             self.on_remove_callback()
@@ -366,13 +401,14 @@ class ExpenseViewer:
             MyMessageBoxes.ShowMessage().show_error(given_error)
 
 
-class ExpenseExcelSpreadsheet:
-    def __init__(self, user_id, parent, year=None):
+class DisplayExcelSpreadsheet:
+    def __init__(self, user_id, parent, year=None, show_users=None):
         self.parent = parent
         self.db = AccountsDatabase()
         self.user_id = user_id
         self.year = year
-        self.information = self.get_expenses()  # Fetch expenses based on the year filter
+        self.show_users = show_users if show_users else None
+        self.information = self.get_information()  # Fetch expenses based on the year filter
 
         # Frame for the Treeview display
         self.excel_spreadsheet_frame = ctk.CTkFrame(self.parent)
@@ -380,48 +416,94 @@ class ExpenseExcelSpreadsheet:
 
         if self.information:
             # Treeview setup for displaying expenses
-            self.tree = ttk.Treeview(self.excel_spreadsheet_frame, columns=("ExpenseID", "Quantity", "Price",
-                                                                            "Type", "Date"),
-                                     show="headings")
-            self.tree.heading("ExpenseID", text="ExpenseID")
-            self.tree.heading("Quantity", text="Quantity")
-            self.tree.heading("Price", text="Price")
-            self.tree.heading("Type", text="Type")
-            self.tree.heading("Date", text="Date")
+            if not show_users:
+                self.tree = ttk.Treeview(
+                    self.excel_spreadsheet_frame,
+                    columns=("ExpenseID", "UserID", "Quantity", "Price", "Type", "Date"),
+                    show="headings",
+                )
+                # Define headings and center-align text below
+                headings = [("ExpenseID", 30), ("UserID", 30), ("Quantity", 70), ("Price", 60), ("Type", 50), ("Date", 100)]
+                for col, width in headings:
+                    self.tree.heading(col, text=col)
+                    self.tree.column(col, anchor="center", width=width)  # Center text and set column width
+
+            elif show_users:
+                self.tree = ttk.Treeview(
+                    self.excel_spreadsheet_frame,
+                    columns=("UserID", "FirstName", "LastName", "Email", "Number", "Level", "Salary"),
+                    show="headings",
+                )
+                # Define headings and center-align text below
+                headings = [
+                    ("UserID", 80),
+                    ("FirstName", 100),
+                    ("LastName", 100),
+                    ("Email", 150),
+                    ("Number", 80),
+                    ("Level", 60),
+                    ("Salary", 100),
+                ]
+                for col, width in headings:
+                    self.tree.heading(col, text=col)
+                    self.tree.column(col, anchor="center", width=width)  # Center text and set column width
             self.tree.pack(side="left", fill="both", expand=True)
 
             # Load expenses data for display
             self.display_expenses()
         else:
-            ctk.CTkLabel(self.excel_spreadsheet_frame, text="No expenses found for your user.\n Only admins can see"
-                                                            " all expenses.").place(x=100, y=100)
+            if self.db.check_user_level(self.user_id) == 0:
+                ctk.CTkLabel(self.excel_spreadsheet_frame, text="No expenses found for your user.\n Only admins can see"
+                                                                " all expenses.").place(x=100, y=100)
+            else:
+                ctk.CTkLabel(self.excel_spreadsheet_frame, text="No expenses found in the database").place(x=100, y=100)
 
-    def get_expenses(self):
+    def get_information(self):
         """Fetch expenses for the user, optionally filtering by year."""
-        all_expenses = self.db.return_expenses_from_user(self.user_id)
+        if self.show_users:
+            all_data = self.db.return_all_users()
+        else:
+            all_data = self.db.return_expenses_from_user(self.user_id)
         if self.year:
             # Filter expenses by the specified year
             filtered_expenses = [
-                expense for expense in all_expenses
+                expense for expense in all_data
                 if datetime.strptime(str(expense['Date']), '%Y-%m-%d').year == self.year
             ]
             return filtered_expenses
-        return all_expenses
+        return all_data
 
     def display_expenses(self):
         """Populate the Treeview with expense data."""
-        for expense in self.information:
-            if isinstance(expense, dict):  # Ensure each row is a dictionary
-                self.tree.insert(
-                    "", "end",
-                    values=(
-                        expense.get("ExpenseID", ""),
-                        expense.get("Quantity", 0),
-                        f"£{expense.get('Price', 0):.2f}",
-                        expense.get("Type", "Unknown"),
-                        expense.get("Date", ""),
-                    ),
-                )
+        if not self.show_users:
+            for expense in self.information:
+                if isinstance(expense, dict):  # Ensure each row is a dictionary
+                    self.tree.insert(
+                        "", "end",
+                        values=(
+                            expense.get("ExpenseID", ""),
+                            expense.get("UserID", ""),
+                            expense.get("Quantity", 0),
+                            f"£{expense.get('Price', 0):.2f}",
+                            expense.get("Type", "Unknown"),
+                            expense.get("Date", ""),
+                        ),
+                    )
+        elif self.show_users:
+            for user in self.information:
+                if isinstance(user, dict):
+                    self.tree.insert(
+                        "", "end",
+                        values=(
+                            user.get("UserID", ""),
+                            user.get("FirstName", ""),
+                            user.get("LastName", ""),
+                            user.get("Email", ""),
+                            user.get("PhoneNumber", ""),
+                            user.get("Level", ""),
+                            user.get("Salary", ""),
+                        ),
+                    )
 
         # Add a scrollbar
         scrollbar = ttk.Scrollbar(self.excel_spreadsheet_frame, orient="vertical", command=self.tree.yview)
@@ -437,23 +519,43 @@ class ExpenseExcelSpreadsheet:
             sheet.column_dimensions['B'].width = 10
             sheet.column_dimensions['C'].width = 10
             sheet.column_dimensions['D'].width = 10
-            sheet.column_dimensions['E'].width = 15
-            sheet.title = f"User Expenses {self.year if self.year else 'All'}"
+            sheet.column_dimensions['E'].width = 10
+            sheet.column_dimensions['F'].width = 15
+            if not self.show_users:
+                sheet.title = f"User Expenses {self.year if self.year else 'All'}"
 
-            # Define the headers and write them to the first row
-            headers = ["ExpenseID", "Quantity", "Price", "Type", "Date"]
-            sheet.append(headers)
+                # Define the headers and write them to the first row
+                headers = ["ExpenseID", "UserID", "Quantity", "Price", "Type", "Date"]
+                sheet.append(headers)
 
-            # Add expense data rows to the sheet
-            for expense in self.information:
-                sheet.append([expense["ExpenseID"], expense["Quantity"], expense["Price"],
-                              expense["Type"], expense["Date"]])
+                # Add expense data rows to the sheet
+                for expense in self.information:
+                    sheet.append([expense["ExpenseID"], expense["UserID"], expense["Quantity"], expense["Price"],
+                                  expense["Type"], expense["Date"]])
 
-            # Determine the path to the Downloads folder
-            downloads_path = Path.home() / "Downloads"
-            # Name the file with a timestamp for uniqueness
-            filename = f"expenses_{self.user_id}_{self.year if self.year else 'all'}_{datetime.now().strftime(
-                '%Y%m%d_%H%M%S')}.xlsx"
+                # Determine the path to the Downloads folder
+                downloads_path = Path.home() / "Downloads"
+                # Name the file with a timestamp for uniqueness
+                filename = f"expenses_{self.user_id}_{self.year if self.year else 'all'}_{datetime.now().strftime(
+                    '%Y%m%d_%H%M%S')}.xlsx"
+            elif self.show_users:
+                sheet.title = f"User List"
+
+                # Define the headers and write them to the first row
+                headers = ["UserID", "FirstName", "LastName", "Email", "PhoneNumber", "Level", "Salary"]
+                sheet.append(headers)
+
+                # Add expense data rows to the sheet
+                for user in self.information:
+                    sheet.append([user["UserID"], user["FirstName"], user["LastName"],
+                                  user["Email"], user["PhoneNumber"], user["Level"], user["Salary"]])
+
+                # Determine the path to the Downloads folder
+                downloads_path = Path.home() / "Downloads"
+                # Name the file with a timestamp for uniqueness
+                filename = f"UserList{datetime.now().strftime(
+                    '%Y%m%d_%H%M%S')}.xlsx"
+
             file_path = downloads_path / filename
             # Save the workbook
             workbook.save(file_path)

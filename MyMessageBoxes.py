@@ -19,9 +19,12 @@ class ShowMessage:
         msg = CTkMessagebox(title="Error:", message=message, icon="cancel")
 
     @staticmethod
-    def ask_question(message, option1, option2, option3):
+    def ask_question(message, option1, option2, option3, destroy_option):
         msg = CTkMessagebox(title="Question:", message=message,
                             icon="question", option_1=option1, option_2=option2, option_3=option3)
         msg.geometry("350x215+750+400")
+        if msg.get() == destroy_option:
+            msg.destroy()
         return msg.get()
+
 

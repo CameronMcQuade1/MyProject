@@ -16,18 +16,19 @@ class AccountsDatabase:
                 username='expensedatabase',
                 password='&FNBra!4117LVv'
             )
+            self.cursor = self.main_db.cursor()
             self.create_tables()
         except mysql.connector.errors.ProgrammingError as e:
             self.bad_connection(e)
 
     def create_tables(self):
-        db_cursor = self.main_db.cursor()
+        self.cursor = self.main_db.cursor()
         # Ensure schema exists and is in use
-        db_cursor.execute("CREATE SCHEMA IF NOT EXISTS ExpenseDatabase")
-        db_cursor.execute("USE ExpenseDatabase")
+        self.cursor.execute("CREATE SCHEMA IF NOT EXISTS ExpenseDatabase")
+        self.cursor.execute("USE ExpenseDatabase")
 
         # Table 1: usertable
-        db_cursor.execute("""
+        self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS usertable (
                 UserID VARCHAR(6) PRIMARY KEY,
                 FirstName CHAR(30) NOT NULL,
@@ -39,7 +40,7 @@ class AccountsDatabase:
         """)
 
         # Table 2: salarytable with One-to-One relationship with usertable
-        db_cursor.execute("""
+        self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS salarytable (
                 UserID VARCHAR(6),
                 Level INT NOT NULL,
@@ -50,7 +51,7 @@ class AccountsDatabase:
         """)
 
         # Table 3: expensetable with One-to-Many relationship with usertable
-        db_cursor.execute("""
+        self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS expensetable (
                 ExpenseID VARCHAR(6) PRIMARY KEY,
                 UserID VARCHAR(6),
@@ -63,7 +64,7 @@ class AccountsDatabase:
             )
         """)
 
-        db_cursor.close()
+        self.cursor.close()
         self.main_db.database = "ExpenseDatabase"
 
     @staticmethod
@@ -301,15 +302,31 @@ class AccountsDatabase:
         except Exception as e:
             return f"Error occurred while removing users: {e}"
 
+    def return_all_incomes(self):
+        try:
+            cursor = self.main_db.cursor(dictionary=True)
+            query = """SELECT UserID, Level, Salary
+            FROM salarytable"""
+            cursor.execute(query)
+            results = cursor.fetchall()
+            cursor.close()
+            return results
+        except Exception as given_error:
+            return given_error
+
+    def update_entry(self, given_entry):
+        pass
+
 
 class ExpenseViewer:
-    def __init__(self, user_id, parent, submit_frame, on_remove_callback, show_users=None):
+    def __init__(self, user_id, parent, submit_frame, on_remove_callback, show_users=None, show_income=None):
         self.__parent = parent
         self.spreadsheet_frame = ctk.CTkFrame(parent)
         self.spreadsheet_frame.pack(expand=True, fill='both')
         self.db = AccountsDatabase()
         self.user_id = user_id
-        self.show_users = show_users if show_users else None
+        self.show_users = show_users
+        self.show_income = show_income
         if self.show_users:
             self.information = self.db.return_all_users()
         elif not self.show_users and self.db.check_user_level(user_id) == 0:
@@ -322,7 +339,7 @@ class ExpenseViewer:
 
         if self.information:
             # Scrollable frame for spreadsheet-like display
-            self.scrollable_frame = ctk.CTkScrollableFrame(self.spreadsheet_frame, width=580, height=300)
+            self.scrollable_frame = ctk.CTkScrollableFrame(self.spreadsheet_frame)
             self.scrollable_frame.pack(fill="both", expand=True)
 
             # Column headers
@@ -341,7 +358,7 @@ class ExpenseViewer:
             self.display_information()
 
             # Submit button to handle selected expenses
-            self.submit_button = ctk.CTkButton(submit_frame, text="Submit",
+            self.submit_button = ctk.CTkButton(submit_frame, text="Remove",
                                                command=self.get_selected_information)
             self.submit_button.pack(expand=True, side='right')
         else:
@@ -402,12 +419,13 @@ class ExpenseViewer:
 
 
 class DisplayExcelSpreadsheet:
-    def __init__(self, user_id, parent, year=None, show_users=None):
+    def __init__(self, user_id, parent, year=None, show_users=None, show_income=None):
         self.parent = parent
         self.db = AccountsDatabase()
         self.user_id = user_id
         self.year = year
-        self.show_users = show_users if show_users else None
+        self.show_users = show_users
+        self.show_income = show_income
         self.information = self.get_information()  # Fetch expenses based on the year filter
 
         # Frame for the Treeview display
@@ -423,7 +441,8 @@ class DisplayExcelSpreadsheet:
                     show="headings",
                 )
                 # Define headings and center-align text below
-                headings = [("ExpenseID", 30), ("UserID", 30), ("Quantity", 70), ("Price", 60), ("Type", 50), ("Date", 100)]
+                headings = [("ExpenseID", 30), ("UserID", 30), ("Quantity", 70), ("Price", 60), ("Type", 50),
+                            ("Date", 100)]
                 for col, width in headings:
                     self.tree.heading(col, text=col)
                     self.tree.column(col, anchor="center", width=width)  # Center text and set column width
@@ -563,5 +582,111 @@ class DisplayExcelSpreadsheet:
             raise Exception("No expenses found for your user from the year chosen.")
 
 
+class ExpenseEditor:
+    def __init__(self, user_id, parent, submit_frame, show_users=None, show_income=None):
+        self.user = user_id
+        self.parent = parent
+        self.show_users = show_users
+        self.show_income = show_income
+        self.db = AccountsDatabase()
+
+        # Main frame for editing
+        self.edit_frame = ctk.CTkFrame(parent)
+        self.edit_frame.pack(fill="both", expand=True)
+
+        # Remove unnecessary excel_spreadsheet_frame
+        # self.excel_spreadsheet_frame = ctk.CTkFrame(self.parent)
+        # self.excel_spreadsheet_frame.pack(fill="both", expand=True)
+
+        if self.show_users:
+            self.to_edit = self.db.return_all_users()
+        elif self.show_income:
+            self.to_edit = self.db.return_all_incomes()
+        elif not self.show_users and not self.show_income and self.db.check_user_level(user_id) == 1:
+            self.to_edit = self.db.return_all_expenses()
+        else:
+            self.to_edit = self.db.return_expenses_from_user(user_id)
+
+        if self.to_edit:
+            # Scrollable frame for spreadsheet-like display
+            self.scrollable_frame = ctk.CTkScrollableFrame(self.edit_frame)
+            self.scrollable_frame.pack(fill="both", expand=True)
+
+            # Display data and add submit button
+            self.information_checkboxes = []
+            self.entry_widgets = []
+            self.display_edits()
+
+            # Submit button
+            self.submit_button = ctk.CTkButton(submit_frame, text="Edit",
+                                               command=self.write_edits, width=200)
+            self.submit_button.pack(padx=30, side='right')
+        else:
+            # No data available message
+            ctk.CTkLabel(self.edit_frame, text="No expenses found from your user.\n Only admins can see all expenses.") \
+                .place(x=100, y=100)
+
+    def display_edits(self):
+        # Clear the frame (if needed)
+        for widget in self.scrollable_frame.winfo_children():
+            widget.destroy()
+
+        # Determine the headers and data structure based on context
+        if self.show_users:
+            headers = ["UserID", "FirstName", "LastName", "Email", "PhoneNumber", "Level", "Salary"]
+            editable_fields = ["FirstName", "LastName", "Email", "PhoneNumber", "Level", "Salary"]
+        elif self.show_income:
+            headers = ["UserID", "Level", "Salary"]
+            editable_fields = ["Level", "Salary"]
+        else:
+            headers = ["ExpenseID", "UserID", "Quantity", "Price", "Type", "Date"]
+            editable_fields = ["Quantity", "Price", "Type"]
+
+        # Add headers
+        for col, header in enumerate(headers):
+            label = ctk.CTkLabel(self.scrollable_frame, text=header, font=("Arial", 14, "bold"))
+            label.grid(row=0, column=col, padx=10, pady=5)
+
+        # Add editable entries
+        self.entry_widgets = []  # Track all entry widgets for validation
+        for row, info in enumerate(self.to_edit, start=1):
+            row_widgets = {}
+            for col, header in enumerate(headers):
+                key = header
+                value = info.get(key, "")  # Fetch the value for the current header
+                entry = ctk.CTkEntry(self.scrollable_frame, width=80)
+                entry.insert(0, str(value))  # Pre-fill the entry box
+
+                # Disable fields that should not be edited
+                if key not in editable_fields:
+                    entry.configure(state="disabled", text_color='grey')
+
+                entry.grid(row=row, column=col, padx=10, pady=5)
+                row_widgets[key] = entry
+
+            self.entry_widgets.append(row_widgets)
+
+    def write_edits(self):
+        changes = []
+        for original_data, row_widgets in zip(self.to_edit, self.entry_widgets):
+            updated_data = {}
+            for key, entry in row_widgets.items():
+                new_value = entry.get()
+                old_value = str(original_data.get(key, ""))
+
+                # Record changes if there's a difference
+                if new_value != old_value:
+                    updated_data[key] = new_value
+
+            if updated_data:
+                updated_data["ID"] = original_data.get("UserID") or original_data.get("ExpenseID")
+                changes.append(updated_data)
+
+        # Placeholder for the database function
+        for change in changes:
+            self.db.update_entry(change)  # Implement this method in the database class
+
+
+
 if __name__ == '__main__':
-    AccountsDatabase().return_all_users()
+    print(AccountsDatabase().return_all_expenses())

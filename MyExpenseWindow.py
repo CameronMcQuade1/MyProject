@@ -204,6 +204,7 @@ class DefaultWindow:
         self.remove_expense_window.title("Remove Expense(s)")
         self.remove_expense_window.geometry("566x350+660+200")  # Customize the size
         self.remove_expense_window.resizable(False, False)
+        self.remove_expense_label = ctk.CTkLabel(self)
 
         # Pass the callback function (show_main_window) to ExpenseViewer
         self.expense_spreadsheet = MyDatabase.ExpenseViewer(self.current_user, self.remove_expense_frame,
@@ -273,7 +274,19 @@ class DefaultWindow:
             cancel_button.pack(expand=True, fill="both")
 
     def edit_expense(self):
-        pass
+        self.remove_main_window()
+        self.edit_expense_window = ctk.CTk()
+        self.edit_expense_frame = ctk.CTkFrame(self.edit_expense_window)
+        self.edit_expense_frame.pack(expand=True, fill="both")
+        self.edit_expense_window.title("Edit Expenses")
+        self.edit_expense_window.geometry("650x401+635+125")
+        self.edit_expense_window.resizable(False, False)
+        self.editing_spreadsheet = MyDatabase.ExpenseEditor(self.current_user, self.edit_expense_frame,
+                                                            self.edit_expense_frame)
+        back_button = ctk.CTkButton(self.edit_expense_frame, text="Back",
+                                    command=lambda: self.show_main_window(self.edit_expense_window), width=200)
+        back_button.pack(padx=30, side='left')
+        self.edit_expense_window.mainloop()
 
     def download_expenses_for_year(self, year, parent):
         try:

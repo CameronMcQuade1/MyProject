@@ -17,7 +17,7 @@ class AccountsDatabase:
                 password='&FNBra!4117LVv'
             )
             self.cursor = self.main_db.cursor()
-            self.create_tables()
+        #   self.create_tables()
         except mysql.connector.errors.ProgrammingError as e:
             self.bad_connection(e)
 
@@ -288,7 +288,7 @@ class AccountsDatabase:
         except Exception as given_error:
             return given_error
 
-    def remove_given_users(self, given_user_ids):
+    def remove_given_users(self, current_user, given_user_ids):
         try:
             cursor = self.main_db.cursor()
             format_strings = ','.join(['%s'] * len(given_user_ids))
@@ -314,8 +314,89 @@ class AccountsDatabase:
         except Exception as given_error:
             return given_error
 
-    def update_entry(self, given_entry):
-        pass
+    def update_expense_in_db(self, changes, edit_expenses=None, edit_users=None, edit_income=None):
+        try:
+            cursor = self.main_db.cursor()
+            updates = []
+            params = []
+
+            if edit_expenses is not None:
+                query = """UPDATE expensetable SET """
+                if 'Quantity' in changes:
+                    updates.append("Quantity = %s")
+                    params.append(changes['Quantity'])
+                if 'Price' in changes:
+                    updates.append("Price = %s")
+                    params.append(changes['Price'])
+                if 'Type' in changes:
+                    updates.append("Type = %s")
+                    params.append(changes['Type'])
+
+                if updates:
+                    query += ", ".join(updates) + " WHERE ExpenseID = %s;"
+                    params.append(changes['ID'])
+                    cursor.execute(query, tuple(params))
+                else:
+                    raise ValueError("No fields to update for income.")
+
+            elif edit_users is not None:
+                query = """UPDATE usertable SET """
+                if 'FirstName' in changes:
+                    updates.append("FirstName = %s")
+                    params.append(changes['FirstName'])
+                if 'LastName' in changes:
+                    updates.append("LastName = %s")
+                    params.append(changes['LastName'])
+                if 'Email' in changes:
+                    updates.append("Email = %s")
+                    params.append(changes['Email'])
+                if 'PhoneNumber' in changes:
+                    updates.append("PhoneNumber = %s")
+                    params.append(changes['PhoneNumber'])
+
+                if updates:
+                    query += ", ".join(updates) + " WHERE UserID = %s;"
+                    params.append(changes['ID'])
+                    cursor.execute(query, tuple(params))
+
+                query = """UPDATE salarytable SET """
+                updates = []
+                params = []
+                if 'Level' in changes:
+                    updates.append("Level = %s")
+                    params.append(changes['Level'])
+                if 'Salary' in changes:
+                    updates.append("Salary = %s")
+                    params.append(changes['Salary'])
+
+                if updates:
+                    query += ", ".join(updates) + " WHERE UserID = %s;"
+                    params.append(changes['ID'])
+                    cursor.execute(query, tuple(params))
+                else:
+                    raise ValueError("No fields to update for user.")
+
+            elif edit_income is not None:
+                query = """UPDATE salarytable SET """
+                if 'Level' in changes:
+                    updates.append("Level = %s")
+                    params.append(changes['Level'])
+                if 'Salary' in changes:
+                    updates.append("Salary = %s")
+                    params.append(changes['Salary'])
+
+                if not updates:
+                    raise ValueError("No fields to update for income.")
+
+                query += ", ".join(updates) + " WHERE UserID = %s;"
+                params.append(changes['ID'])
+                cursor.execute(query, tuple(params))
+
+            self.main_db.commit()
+            cursor.close()
+            return "Successfully updated the database."
+        except Exception as e:
+            return e
 
 
 class ExpenseViewer:
@@ -409,7 +490,7 @@ class ExpenseViewer:
                 selected_information = [expense_id for var, expense_id in self.information_checkboxes if var.get()]
                 # Attempt to remove the selected expenses from the database
             remove_expenses = AccountsDatabase().remove_given_expenses(selected_information) if not (
-                self.show_users) else AccountsDatabase().remove_given_users(selected_information)
+                self.show_users) else AccountsDatabase().remove_given_users(self.user_id, selected_information)
             MyMessageBoxes.ShowMessage().show_info(remove_expenses)
 
             self.on_remove_callback()
@@ -583,11 +664,14 @@ class DisplayExcelSpreadsheet:
 
 
 class ExpenseEditor:
-    def __init__(self, user_id, parent, submit_frame, show_users=None, show_income=None):
+    def __init__(self, user_id, parent, submit_frame, callback_function=lambda: None, show_expenses=None,
+                 show_users=None, show_income=None):
         self.user = user_id
         self.parent = parent
+        self.show_expenses = show_expenses
         self.show_users = show_users
         self.show_income = show_income
+        self.callback_function = callback_function
         self.db = AccountsDatabase()
 
         # Main frame for editing
@@ -654,8 +738,14 @@ class ExpenseEditor:
             for col, header in enumerate(headers):
                 key = header
                 value = info.get(key, "")  # Fetch the value for the current header
-                entry = ctk.CTkEntry(self.scrollable_frame, width=80)
-                entry.insert(0, str(value))  # Pre-fill the entry box
+                if header == "Type":
+                    entry_options = ["Rent", "Utilities", "Salaries", "Insurance", "Equipment", "Supplies", "Marketing",
+                                     "Services", "Training", "Travel", "Food", "Other"]
+                    entry = ctk.CTkOptionMenu(self.scrollable_frame, values=entry_options, width=100)
+                    entry.set(str(value))
+                else:
+                    entry = ctk.CTkEntry(self.scrollable_frame, width=80)
+                    entry.insert(0, str(value))  # Pre-fill the entry box
 
                 # Disable fields that should not be edited
                 if key not in editable_fields:
@@ -679,14 +769,33 @@ class ExpenseEditor:
                     updated_data[key] = new_value
 
             if updated_data:
-                updated_data["ID"] = original_data.get("UserID") or original_data.get("ExpenseID")
+                updated_data["ID"] = original_data.get("ExpenseID") or original_data.get("UserID")
                 changes.append(updated_data)
-
-        # Placeholder for the database function
-        for change in changes:
-            self.db.update_entry(change)  # Implement this method in the database class
-
+            # Placeholder for the database function
+            for change in changes:
+                if self.show_expenses:
+                    self.db.update_expense_in_db(change, edit_expenses=True)
+                elif self.show_income:
+                    self.db.update_expense_in_db(change, edit_income=True)
+                else:
+                    self.db.update_expense_in_db(change, edit_users=True)
+        if changes:
+            MyMessageBoxes.ShowMessage().show_info("Successfully updated database")
+            self.callback_function()
+        else:
+            MyMessageBoxes.ShowMessage().show_error("No edits detected")
 
 
 if __name__ == '__main__':
-    print(AccountsDatabase().return_all_expenses())
+    fake_user = ["CM0003", "CAM", "MCQ", "CAM.MCQ@OUTLOOK.COM", "07483226639",
+                 "EvEHoD5wIaiLak2xz/k6vA==$jMJ2m/pdg5EJfcI3e/GLZQWK7DR96RA/47NroTmLS8s=$100000", "0", "2"]
+    user_id = fake_user[0]
+    first_name = fake_user[1]
+    last_name = fake_user[2]
+    email = fake_user[3]
+    phone_number = fake_user[4]
+    hashed_password = fake_user[5]
+    level = fake_user[6]
+    salary = fake_user[7]
+    AccountsDatabase().add_user_to_db(user_id, first_name, last_name, email, phone_number,
+                                      hashed_password, level, salary)

@@ -51,10 +51,28 @@ class DefaultWindow:
 
     def show_main_window(self, target=None):
         target.withdraw() if target else None
+        self.expense_view_label.destroy()
+        self.create_expense_label(self.nb.tab("Expenses"), 300, 20)
         self.parent.deiconify()
 
     def set_current_tab(self, nb_tab):
         self.nb.set(nb_tab)
+
+    def create_expense_label(self, parent, place_x, place_y):
+        total_expenses_from_user = self.main_db.return_total_inputted_from_user(self.current_user)
+        total_expenses_summed = self.main_db.return_expenses_summed(self.current_user)
+        if self.main_db.check_user_level(self.current_user) == 0:
+            self.expense_view_label = ctk.CTkLabel(parent, text=f"User {self.current_user}:\n"
+                                                                f"{total_expenses_from_user} Expenses,"
+                                                                f" Equating £"
+                                                                f"{total_expenses_summed}.",
+                                                   font=("Arial", 18))
+        else:
+            self.expense_view_label = ctk.CTkLabel(parent, text=f"Admin User {self.current_user}:\n"
+                                                                f"{total_expenses_from_user} Total Expenses,"
+                                                                f" Equating £{total_expenses_summed}",
+                                                   font=("Arial", 18))
+        self.expense_view_label.place(x=place_x, y=place_y)  # Adjust coordinates as needed
 
     def create_expenses_tab(self):
         # Access the "Expenses" tab directly
@@ -81,24 +99,8 @@ class DefaultWindow:
         spreadsheet_image = spreadsheet_image.resize((60, 60))  # Resize to fit button
         spreadsheet_image = ctk.CTkImage(light_image=spreadsheet_image, size=(60, 60))
 
-        # Label for total expenses from current user
-        total_expenses_from_user = self.main_db.return_total_inputted_from_user(self.current_user)
-        total_expenses_summed = self.main_db.return_expenses_summed(self.current_user)
-        if self.main_db.check_user_level(self.current_user) == 0:
-            self.expense_view_label = ctk.CTkLabel(expenses_tab, text=f"User {self.current_user}:\n"
-                                                                      f"{total_expenses_from_user} Expenses,"
-                                                                      f" Equating £"
-                                                                      f"{total_expenses_summed}.",
-                                                   font=("Arial", 18))
-        else:
-            self.expense_view_label = ctk.CTkLabel(expenses_tab, text=f"Admin User {self.current_user}:\n"
-                                                                      f"{total_expenses_from_user} Total Expenses,"
-                                                                      f" Equating £"
-                                                                      f"{total_expenses_summed}.",
-                                                   font=("Arial", 18))
-        self.expense_view_label.place(x=300, y=20)  # Adjust coordinates as needed
-
         # Add Expense button
+        self.create_expense_label(expenses_tab, 300, 20)
         self.add_expenses_button = ctk.CTkButton(expenses_tab, image=green_plus_image, command=self.add_expense,
                                                  width=200, height=100, text="Add Expense", compound="bottom",
                                                  font=("Arial", 16))
@@ -112,7 +114,7 @@ class DefaultWindow:
 
         # Remove Expense button
         self.view_expenses_button = ctk.CTkButton(expenses_tab, image=spreadsheet_image, command=self.view_expenses,
-                                                  width=200, height=100, text="View / Download Expenses",
+                                                  width=200, height=100, text="Download Expenses",
                                                   compound="bottom", font=("Arial", 16))
         self.view_expenses_button.place(x=175, y=250)
 
@@ -192,6 +194,7 @@ class DefaultWindow:
         try:
             self.main_db.submit_expense_db(inputs)
             MyMessageBoxes.ShowMessage().show_info("Expense added successfully.")
+            self.show_main_window(self.add_expense_window)
         except Exception as error:
             MyMessageBoxes.ShowMessage().show_error(f"An error occurred: {error}")
 
@@ -204,12 +207,12 @@ class DefaultWindow:
         self.remove_expense_window.title("Remove Expense(s)")
         self.remove_expense_window.geometry("566x350+660+200")  # Customize the size
         self.remove_expense_window.resizable(False, False)
-        self.remove_expense_label = ctk.CTkLabel(self)
+        self.remove_expense_label = ctk.CTkLabel(self.remove_expense_window, text='Remove Expense(s):')
 
         # Pass the callback function (show_main_window) to ExpenseViewer
         self.expense_spreadsheet = MyDatabase.ExpenseViewer(self.current_user, self.remove_expense_frame,
-                                                            self.remove_expense_frame,
-                                                            lambda: self.show_main_window(self.remove_expense_window))
+                                                            self.remove_expense_frame, lambda:
+                                                            self.show_main_window(self.remove_expense_window))
 
         # Back button to go back to the main window
         back_button = ctk.CTkButton(self.remove_expense_frame, text="Back",
@@ -282,7 +285,9 @@ class DefaultWindow:
         self.edit_expense_window.geometry("650x401+635+125")
         self.edit_expense_window.resizable(False, False)
         self.editing_spreadsheet = MyDatabase.ExpenseEditor(self.current_user, self.edit_expense_frame,
-                                                            self.edit_expense_frame)
+                                                            self.edit_expense_frame, show_expenses=True,
+                                                            callback_function=lambda: self.show_main_window(
+                                                                self.edit_expense_window))
         back_button = ctk.CTkButton(self.edit_expense_frame, text="Back",
                                     command=lambda: self.show_main_window(self.edit_expense_window), width=200)
         back_button.pack(padx=30, side='left')
@@ -487,11 +492,12 @@ class DefaultWindow:
                                        command=plot_expense_heatmap)
         heatmap_button.pack(side="left", padx=6, expand=True, fill='both')
         starting_year = datetime.now().year
-        choose_year_button = ctk.CTkOptionMenu(button_frame, values=[f'Year: {starting_year}',
+        choose_year_button = ctk.CTkOptionMenu(button_frame, values=[f'Year: {starting_year - 1}',
+                                                                     f'Year: {starting_year}',
                                                                      f'Year: {starting_year + 1}',
                                                                      f'Year: {starting_year + 2}'],
                                                variable=current_year)
-        choose_year_button.set('Year: 2024')
+        choose_year_button.set(f'Year: {starting_year}')
         choose_year_button.pack(side="left", padx=6, expand=True, fill='both')
 
         refresh_graph_button = ctk.CTkButton(button_frame, text="Refresh Graph",
@@ -502,10 +508,6 @@ class DefaultWindow:
         plot_expenses_over_time()
 
     def create_table_tab(self):
-        """
-        Creates the 'Table' tab in the notebook to display an Excel-like, scrollable table for the current user's data,
-        including the expense type.
-        """
         # Create the Table tab and its main frame
         table_tab = self.nb.tab("Table")
         table_tab_frame = ctk.CTkFrame(table_tab)
@@ -513,7 +515,7 @@ class DefaultWindow:
 
         # Create a frame for table controls (e.g., refresh button)
         table_tab_frame.pack(fill="both", expand=True)
-        control_frame.pack(fill="x", pady=10)
+        control_frame.pack(fill="x")
 
         # Create a frame for the table and scrollbars
         table_frame = ctk.CTkFrame(table_tab_frame)
@@ -526,7 +528,7 @@ class DefaultWindow:
         # Create the Treeview widget for displaying the table
         tree = ttk.Treeview(
             table_frame,
-            columns=("ExpenseID", "Type", "Quantity", "Price", "Date"),
+            columns=("ExpenseID", "UserID", "Type", "Quantity", "Price", "Date"),
             show="headings",
             yscrollcommand=scrollbar_y.set,
             xscrollcommand=scrollbar_x.set,
@@ -542,10 +544,10 @@ class DefaultWindow:
         tree.pack(fill="both", expand=True)
 
         # Define table headers
-        headers = ["ExpenseID", "Type", "Quantity", "Price", "Date"]
+        headers = ["ExpenseID", "UserID", "Type", "Quantity", "Price", "Date"]
         for col in headers:
             tree.heading(col, text=col)
-            tree.column(col, anchor="center")
+            tree.column(col, anchor="center", stretch=True, width=100)
 
         def fetch_table_data():
             """
@@ -556,7 +558,10 @@ class DefaultWindow:
 
             try:
                 # Retrieve data from the database
-                expenses = self.main_db.return_expenses_from_user(self.current_user)
+                if self.main_db.check_user_level(self.current_user) == 0:
+                    expenses = self.main_db.return_expenses_from_user(self.current_user)
+                else:
+                    expenses = self.main_db.return_all_expenses()
 
                 if not expenses:
                     raise ValueError("No data available to display.")
@@ -568,6 +573,7 @@ class DefaultWindow:
                             "", "end",
                             values=(
                                 row.get("ExpenseID", ""),
+                                row.get("UserID", ""),
                                 row.get("Type", "Unknown"),  # Use 'Unknown' if Type is missing
                                 row.get("Quantity", 0),
                                 f"£{row.get('Price', 0):.2f}",
@@ -583,7 +589,9 @@ class DefaultWindow:
             """
             fetch_table_data()
 
-        current_user_label = ctk.CTkLabel(control_frame, text=f"User {self.current_user}'s Expenses:")
+        current_user_label = ctk.CTkLabel(control_frame, text=f"User {self.current_user}'s Expenses:" if
+                                          self.main_db.check_user_level(self.current_user) == 0 else
+                                          "All Expenses:")
         current_user_label.pack(side="bottom", expand=True)
         # Add Refresh Button to control frame
         refresh_button = ctk.CTkButton(control_frame, text="Refresh Table", command=refresh_table)
@@ -602,6 +610,9 @@ class DefaultWindow:
         plotter_tab = self.nb.tab("Predictor")
         plotter_tab_frame = ctk.CTkFrame(plotter_tab)
         plotter_tab_frame.pack(fill="both", expand=True)
+
+        predict_button = ctk.CTkButton(plotter_tab_frame, text="Refresh Future Expenses Prediction")
+        predict_button.pack()
 
         # Create a frame for the graph
         graph_frame = ctk.CTkFrame(plotter_tab_frame)
@@ -700,13 +711,8 @@ class DefaultWindow:
                 ctk.CTkLabel(graph_frame, text=f"Error: {e}", font=("Arial", 16)).pack(pady=10)
 
         # Create a button to trigger the prediction
-        predict_button = ctk.CTkButton(
-            plotter_tab_frame,
-            text="Refresh Future Expenses Prediction",
-            command=fetch_and_predict_expenses
-        )
-        predict_button.pack(pady=10)
 
+        predict_button.configure(command=fetch_and_predict_expenses)
         # Display the initial empty graph
         fetch_and_predict_expenses()
 
@@ -714,8 +720,8 @@ class DefaultWindow:
 class AdminWindow(DefaultWindow):
     def __init__(self, parent, current_user, current_tab=None):
         super().__init__(parent, current_user)
-        self.nb.add("Income")
         self.nb.add("Accounts")
+        self.nb.add("Extras")
         self.nb.set(current_tab) if current_tab else None
         self.setup_extra_tabs()
 
@@ -792,7 +798,20 @@ class AdminWindow(DefaultWindow):
         self.remove_user_window.mainloop()
 
     def edit_user(self):
-        pass
+        self.remove_main_window()
+        self.edit_user_window = ctk.CTk()
+        self.edit_user_frame = ctk.CTkFrame(self.edit_user_window)
+        self.edit_user_frame.pack(expand=True, fill="both")
+        self.edit_user_window.geometry("750x463+635+125")
+        self.edit_user_window.resizable(False, False)
+        self.edit_user_window.title("Edit User(s)")
+        self.edit_user_spreadsheet = MyDatabase.ExpenseEditor(self.current_user, self.edit_user_frame,
+                                                              self.edit_user_frame, show_users=True, callback_function=
+                                                              lambda: (self.show_main_window(self.edit_user_window)))
+        back_button = ctk.CTkButton(self.edit_user_frame, text="Back",
+                                    command=lambda: self.show_main_window(self.edit_user_window), width=200)
+        back_button.pack(padx=30, side='left')
+        self.edit_user_window.mainloop()
 
     def view_users(self):
         self.remove_main_window()

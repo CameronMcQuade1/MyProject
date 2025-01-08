@@ -17,6 +17,8 @@ import MyDatabase
 from collections import defaultdict
 from datetime import datetime, timedelta
 import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
+import requests
 
 
 class DefaultWindow:
@@ -721,16 +723,15 @@ class AdminWindow(DefaultWindow):
     def __init__(self, parent, current_user, current_tab=None):
         super().__init__(parent, current_user)
         self.nb.add("Accounts")
-        self.nb.add("Extras")
+        self.nb.add("Budgeting")
+        self.nb.add("Testing")
         self.nb.set(current_tab) if current_tab else None
         self.setup_extra_tabs()
 
     def setup_extra_tabs(self):
-        self.create_income_tab()
         self.create_accounts_tab()
-
-    def create_income_tab(self):
-        pass
+        self.create_budgeting_tab()
+        self.create_testing_tab()
 
     def create_accounts_tab(self):
         accounts_tab = self.nb.tab("Accounts")
@@ -826,6 +827,221 @@ class AdminWindow(DefaultWindow):
                                     command=lambda: self.show_main_window(self.view_users_window), width=140)
         back_button.pack(expand=True, side='left')
         self.view_users_window.mainloop()
+
+    def create_budgeting_tab(self):
+        budgeting_tab = self.nb.tab("Budgeting")
+        expense_vs_income_button = ctk.CTkButton(budgeting_tab, command=self.expense_vs_income, width=200,
+                                                 height=100, text="Expense Against Income", font=("Arial", 16))
+        expense_vs_income_button.place(x=175, y=100)
+        currency_converter_button = ctk.CTkButton(budgeting_tab, command=self.currency_converter, width=200,
+                                                  height=100, text="Currency Converter", font=("Arial", 16))
+        currency_converter_button.place(x=450, y=100)
+        budget_calculator_button = ctk.CTkButton(budgeting_tab, command=self.budgeting_calculator, width=200,
+                                                 height=100, text="Budgeting Calculator", font=("Arial", 16))
+        budget_calculator_button.place(x=175, y=250)
+        loan_calculator_button = ctk.CTkButton(budgeting_tab, command=self.loan_calculator, width=200, height=100,
+                                               text="Loan calculator", font=("Arial", 16))
+        loan_calculator_button.place(x=450, y=250)
+
+    def expense_vs_income(self):
+        self.remove_main_window()
+        expense_income_window = ctk.CTk()
+        expense_income_window.geometry("800x494+560+200")
+        expense_income_window.resizable(False, False)
+        expense_income_buttons_frame = ctk.CTkFrame(expense_income_window)
+        expense_income_buttons_frame.pack(fill='both', side='bottom')
+        expense_vs_income_frame = ctk.CTkFrame(expense_income_window)
+        expense_vs_income_frame.pack(fill="both", expand=True, pady=5)
+
+        def display_plot():
+            for widget in expense_vs_income_frame.winfo_children():
+                widget.destroy()
+
+            try:
+                # Retrieve and process expenses
+                expenses = self.main_db.return_all_expenses()
+                expense_totals = {}
+
+                for expense in expenses:
+                    date = expense["Date"]  # Already a datetime.date object
+                    total_price = expense["Quantity"] * expense["Price"]
+                    expense_totals[date] = expense_totals.get(date, 0) + total_price
+
+                expense_dates = [datetime.combine(date, datetime.min.time()) for date in expense_totals.keys()]
+                expense_values = list(expense_totals.values())
+
+                # Retrieve and process incomes
+                incomes = self.main_db.return_all_incomes()
+                income_totals = {}
+
+                for income in incomes:
+                    # Placeholder logic for income dates
+                    date = datetime.now().date()  # Replace with actual date logic if available
+                    salary = income["Salary"]
+                    income_totals[date] = income_totals.get(date, 0) + salary
+
+                income_dates = [datetime.combine(date, datetime.min.time()) for date in income_totals.keys()]
+                income_values = list(income_totals.values())
+
+                # Create the plot
+                fig, ax = plt.subplots(figsize=(10, 6))  # Increase figure size
+
+                # Plot Expenses
+                ax.plot(expense_dates, expense_values, label="Expenses", marker='o', color="red")
+
+                # Add Horizontal Line for Income
+                income_mean = sum(income_values) / len(income_values)  # Average income if multiple
+                ax.hlines(
+                    y=income_mean,
+                    xmin=min(expense_dates),
+                    xmax=max(expense_dates),
+                    colors='green',
+                    label='Income'
+                )
+
+                # Title and Labels
+                ax.set_title("Expenses vs Income", fontsize=16)
+                ax.set_xlabel("Date")
+                ax.set_ylabel("Amount")
+                ax.legend()
+                ax.grid(True)
+
+                # Adjust Font Size and Rotate Dates
+                ax.tick_params(axis='x', labelsize=8)  # Smaller font size for x-axis
+                fig.autofmt_xdate(rotation=45)  # Rotate date labels for better visibility
+
+                # Display
+                canvas = FigureCanvasTkAgg(fig, master=expense_vs_income_frame)
+                canvas_widget = canvas.get_tk_widget()
+                canvas_widget.pack(expand=True, fill="both")
+                canvas.draw()
+
+            except Exception as e:
+                error_label = ctk.CTkLabel(expense_vs_income_frame, text=f"Error: {e}")
+                error_label.pack(pady=20)
+
+        # Add a button to refresh or redraw the plot
+        display_plot()
+        refresh_button = ctk.CTkButton(
+            expense_income_buttons_frame,
+            text="Refresh Expenses Against Income",
+            command=display_plot
+        )
+        refresh_button.pack(pady=10, expand=True, side='right')
+        back_button = ctk.CTkButton(
+            expense_income_buttons_frame,
+            text="Back",
+            command=lambda: self.show_main_window(expense_income_window)
+        )
+        back_button.pack(pady=10, expand=True, side='left')
+
+        expense_income_window.mainloop()
+
+    def currency_converter(self):
+        # Remove the main window and create the converter window
+        self.remove_main_window()
+        converter_window = ctk.CTk()
+        converter_window.geometry("400x300+760+200")
+        converter_window.title("Currency Converter")
+
+        # Frame for the converter UI
+        converter_frame = ctk.CTkFrame(converter_window)
+        converter_frame.pack(pady=20, padx=20, fill="both", expand=True)
+
+        # Label for title
+        title_label = ctk.CTkLabel(converter_frame, text="Currency Converter", font=("Arial", 16))
+        title_label.pack(pady=10)
+
+        # Input field for amount
+        amount_entry = ctk.CTkEntry(converter_frame, placeholder_text="Enter amount")
+        amount_entry.pack(pady=5)
+
+        # Dropdown for source currency
+        source_currency_var = ctk.StringVar(value="GBP")  # Default currency
+        all_currencies = self.get_exchange_rates("GBP")  # Get all currencies from API
+        if "error" in all_currencies:
+            return f"Error fetching currencies: {all_currencies['error']}"
+
+        # Get the list of all available currencies
+        available_currencies = list(all_currencies.keys())
+
+        # Popular currencies to show at the top
+        default_currencies = ["GBP", "EUR", "USD"]
+
+        # Remove popular currencies from the list of available currencies if they exist
+        available_currencies = [currency for currency in available_currencies if currency not in default_currencies]
+
+        # Combine popular currencies with the other currencies
+        combined_currencies = default_currencies + available_currencies
+
+        # Source currency dropdown with popular currencies at the top
+        source_currency_menu = ctk.CTkOptionMenu(converter_frame, values=combined_currencies,
+                                                 variable=source_currency_var)
+        source_currency_menu.pack(pady=5)
+
+        # Dropdown for target currency
+        target_currency_var = ctk.StringVar(value="USD")  # Default currency
+        target_currency_menu = ctk.CTkOptionMenu(converter_frame, values=combined_currencies,
+                                                 variable=target_currency_var)
+        target_currency_menu.pack(pady=5)
+
+        # Label to display the result
+        result_label = ctk.CTkLabel(converter_frame, text="", font=("Arial", 14))
+        result_label.pack(pady=10)
+
+        # Convert button
+        def convert_currency():
+            try:
+                amount = float(amount_entry.get())  # Get the amount
+                if amount < 0:
+                    raise ValueError
+                source_currency = source_currency_var.get()
+                target_currency = target_currency_var.get()
+
+                # Fetch real-time exchange rates
+                rates = self.get_exchange_rates(source_currency)  # API call for real-time rates
+                if source_currency not in rates or target_currency not in rates:
+                    result_label.configure(text="Error: Invalid currency code")
+                    return
+
+                # Perform conversion
+                conversion_rate = rates[target_currency]
+                converted_amount = amount * conversion_rate
+                result_label.configure(text=f"{amount} {source_currency} = {converted_amount:.2f} {target_currency}")
+
+            except ValueError:
+                result_label.configure(text="Error: Invalid amount")
+
+        back_button = ctk.CTkButton(converter_frame, text="Back", command=lambda:self.show_main_window(
+            converter_window))
+        convert_button = ctk.CTkButton(converter_frame, text="Convert", command=convert_currency)
+        back_button.pack(pady=10, expand=True, side='left')
+        convert_button.pack(pady=10, expand=True, side='right')
+
+        converter_window.mainloop()
+
+    # Function to fetch exchange rates from the API
+    def get_exchange_rates(self, base_currency):
+        try:
+            url = f"https://v6.exchangerate-api.com/v6/92eae0a0ef89c59477c0f99d/latest/{base_currency}"
+            response = requests.get(url)
+            data = response.json()
+
+            if data['result'] == 'success':
+                return data['conversion_rates']  # Returns the conversion rates
+            else:
+                raise Exception("Error fetching exchange rates")
+        except Exception as e:
+            return {"error": str(e)}  # Return error message in case of failure
+
+    def budgeting_calculator(self):
+        pass
+
+    def loan_calculator(self):
+        pass
+
+    def create_testing_tab(self):
+        pass
 
 
 if __name__ == '__main__':

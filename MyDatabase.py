@@ -149,7 +149,7 @@ class AccountsDatabase:
         except Exception as error:
             return error
 
-    def return_expenses_from_user(self, current_user):
+    def return_expenses_from_user(self, current_user=None):
         try:
             cursor = self.main_db.cursor(dictionary=True)
             if self.check_user_level(current_user) == 0:
@@ -198,15 +198,6 @@ class AccountsDatabase:
         return total_sum
 
     def get_expenses_by_type(self, current_user):
-        """
-        Retrieves the total expense amount for each type for the given user.
-
-        Args:
-            current_user (str): The user ID whose expenses need to be retrieved.
-
-        Returns:
-            dict: A dictionary where keys are expense types and values are the summed amounts.
-        """
         try:
             cursor = self.main_db.cursor(dictionary=True)
             if self.check_user_level(current_user) == 0:
@@ -787,6 +778,8 @@ class ExpenseEditor:
 
 
 if __name__ == '__main__':
+    AccountsDatabase()
+    '''
     fake_user = ["CM0003", "CAM", "MCQ", "CAM.MCQ@OUTLOOK.COM", "07483226639",
                  "EvEHoD5wIaiLak2xz/k6vA==$jMJ2m/pdg5EJfcI3e/GLZQWK7DR96RA/47NroTmLS8s=$100000", "0", "2"]
     user_id = fake_user[0]
@@ -798,4 +791,4 @@ if __name__ == '__main__':
     level = fake_user[6]
     salary = fake_user[7]
     AccountsDatabase().add_user_to_db(user_id, first_name, last_name, email, phone_number,
-                                      hashed_password, level, salary)
+                                      hashed_password, level, salary)'''

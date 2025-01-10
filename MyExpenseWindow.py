@@ -2,7 +2,8 @@ import customtkinter as ctk
 from PIL import Image
 import seaborn as sns
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, filedialog
+import pandas as pd
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.pipeline import make_pipeline
 from sklearn.linear_model import LinearRegression
@@ -14,11 +15,14 @@ import CreateAccountScreen
 import MyMessageBoxes
 import MyCustomFunctions
 import MyDatabase
+import LoginScreen
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import requests
+from decimal import Decimal
+import subprocess
 
 
 class DefaultWindow:
@@ -28,6 +32,7 @@ class DefaultWindow:
         self.main_db = MyDatabase.AccountsDatabase()
         self.root = ctk.CTkFrame(parent)
         self.root.pack(expand=True, fill="both")
+        self.menu_bar()
 
         self.nb = ctk.CTkTabview(self.root, width=500, height=400)
         self.nb.pack(expand=True, fill="both")
@@ -59,6 +64,20 @@ class DefaultWindow:
 
     def set_current_tab(self, nb_tab):
         self.nb.set(nb_tab)
+
+    def menu_bar(self):
+        main_bar = tk.Menu()
+        self.parent.configure(menu=main_bar)
+        settings_menu = tk.Menu(main_bar, tearoff=False)
+        main_bar.add_cascade(label='Settings', menu=settings_menu)
+        settings_menu.add_command(label='Change Background Colour')
+
+        help_menu = tk.Menu(main_bar, tearoff=False)
+        main_bar.add_cascade(label='Help', menu=help_menu)
+        help_menu.add_command(label='Frequently Asked Questions')
+
+        main_bar.add_command(label='Logout', command=lambda: (self.root.destroy(), main_bar.delete("Logout"),
+                                                              LoginScreen.MainLogin(self.parent)))
 
     def create_expense_label(self, parent, place_x, place_y):
         total_expenses_from_user = self.main_db.return_total_inputted_from_user(self.current_user)
@@ -207,7 +226,7 @@ class DefaultWindow:
         self.remove_expense_frame = ctk.CTkFrame(self.remove_expense_window)
         self.remove_expense_frame.pack(expand=True, fill="both")
         self.remove_expense_window.title("Remove Expense(s)")
-        self.remove_expense_window.geometry("566x350+660+200")  # Customize the size
+        self.remove_expense_window.geometry("620x383+640+200")  # Customize the size
         self.remove_expense_window.resizable(False, False)
         self.remove_expense_label = ctk.CTkLabel(self.remove_expense_window, text='Remove Expense(s):')
 
@@ -284,7 +303,7 @@ class DefaultWindow:
         self.edit_expense_frame = ctk.CTkFrame(self.edit_expense_window)
         self.edit_expense_frame.pack(expand=True, fill="both")
         self.edit_expense_window.title("Edit Expenses")
-        self.edit_expense_window.geometry("650x401+635+125")
+        self.edit_expense_window.geometry("750x463+585+125")
         self.edit_expense_window.resizable(False, False)
         self.editing_spreadsheet = MyDatabase.ExpenseEditor(self.current_user, self.edit_expense_frame,
                                                             self.edit_expense_frame, show_expenses=True,
@@ -527,10 +546,14 @@ class DefaultWindow:
         scrollbar_y = tk.Scrollbar(table_frame, orient="vertical")
         scrollbar_x = tk.Scrollbar(table_frame, orient="horizontal")
 
+        style = ttk.Style()
+        style.configure("Treeview", font=("Roboto", 12))  # Change "Helvetica" and 12 as needed
+        style.configure("Treeview.Heading", font=("Roboto", 13))
+
         # Create the Treeview widget for displaying the table
         tree = ttk.Treeview(
             table_frame,
-            columns=("ExpenseID", "UserID", "Type", "Quantity", "Price", "Date"),
+            columns=("ExpenseID", "UserID", "Name", "Type", "Quantity", "Price", "Date"),
             show="headings",
             yscrollcommand=scrollbar_y.set,
             xscrollcommand=scrollbar_x.set,
@@ -546,7 +569,7 @@ class DefaultWindow:
         tree.pack(fill="both", expand=True)
 
         # Define table headers
-        headers = ["ExpenseID", "UserID", "Type", "Quantity", "Price", "Date"]
+        headers = ["ExpenseID", "UserID", "Name", "Type", "Quantity", "Price", "Date"]
         for col in headers:
             tree.heading(col, text=col)
             tree.column(col, anchor="center", stretch=True, width=100)
@@ -576,6 +599,7 @@ class DefaultWindow:
                             values=(
                                 row.get("ExpenseID", ""),
                                 row.get("UserID", ""),
+                                row.get("Name", ""),
                                 row.get("Type", "Unknown"),  # Use 'Unknown' if Type is missing
                                 row.get("Quantity", 0),
                                 f"£{row.get('Price', 0):.2f}",
@@ -591,9 +615,8 @@ class DefaultWindow:
             """
             fetch_table_data()
 
-        current_user_label = ctk.CTkLabel(control_frame, text=f"User {self.current_user}'s Expenses:" if
-                                          self.main_db.check_user_level(self.current_user) == 0 else
-                                          "All Expenses:")
+        current_user_label = ctk.CTkLabel(control_frame, text=f"User {self.current_user}'s Expenses:" if self.main_db.
+                                          check_user_level(self.current_user) == 0 else "All Expenses:")
         current_user_label.pack(side="bottom", expand=True)
         # Add Refresh Button to control frame
         refresh_button = ctk.CTkButton(control_frame, text="Refresh Table", command=refresh_table)
@@ -724,14 +747,14 @@ class AdminWindow(DefaultWindow):
         super().__init__(parent, current_user)
         self.nb.add("Accounts")
         self.nb.add("Budgeting")
-        self.nb.add("Testing")
+        self.nb.add("Database")
         self.nb.set(current_tab) if current_tab else None
         self.setup_extra_tabs()
 
     def setup_extra_tabs(self):
         self.create_accounts_tab()
         self.create_budgeting_tab()
-        self.create_testing_tab()
+        self.create_database_tab()
 
     def create_accounts_tab(self):
         accounts_tab = self.nb.tab("Accounts")
@@ -807,8 +830,9 @@ class AdminWindow(DefaultWindow):
         self.edit_user_window.resizable(False, False)
         self.edit_user_window.title("Edit User(s)")
         self.edit_user_spreadsheet = MyDatabase.ExpenseEditor(self.current_user, self.edit_user_frame,
-                                                              self.edit_user_frame, show_users=True, callback_function=
-                                                              lambda: (self.show_main_window(self.edit_user_window)))
+                                                              self.edit_user_frame, show_users=True,
+                                                              callback_function=lambda:
+                                                              (self.show_main_window(self.edit_user_window)))
         back_button = ctk.CTkButton(self.edit_user_frame, text="Back",
                                     command=lambda: self.show_main_window(self.edit_user_window), width=200)
         back_button.pack(padx=30, side='left')
@@ -835,13 +859,13 @@ class AdminWindow(DefaultWindow):
         expense_vs_income_button.place(x=175, y=100)
         currency_converter_button = ctk.CTkButton(budgeting_tab, command=self.currency_converter, width=200,
                                                   height=100, text="Currency Converter", font=("Arial", 16))
-        currency_converter_button.place(x=450, y=100)
-        budget_calculator_button = ctk.CTkButton(budgeting_tab, command=self.budgeting_calculator, width=200,
-                                                 height=100, text="Budgeting Calculator", font=("Arial", 16))
-        budget_calculator_button.place(x=175, y=250)
-        loan_calculator_button = ctk.CTkButton(budgeting_tab, command=self.loan_calculator, width=200, height=100,
-                                               text="Loan calculator", font=("Arial", 16))
-        loan_calculator_button.place(x=450, y=250)
+        currency_converter_button.place(x=450, y=250)
+        income_graph_button = ctk.CTkButton(budgeting_tab, command=lambda: (self.income_graph(
+            self.main_db.return_all_incomes())), width=200, height=100, text="Income Graph", font=("Arial", 16))
+        income_graph_button.place(x=450, y=100)
+        loan_calculator_button = ctk.CTkButton(budgeting_tab, command=self.display_calculators, width=200, height=100,
+                                               text="Calculators", font=("Arial", 16))
+        loan_calculator_button.place(x=175, y=250)
 
     def expense_vs_income(self):
         self.remove_main_window()
@@ -1012,7 +1036,7 @@ class AdminWindow(DefaultWindow):
             except ValueError:
                 result_label.configure(text="Error: Invalid amount")
 
-        back_button = ctk.CTkButton(converter_frame, text="Back", command=lambda:self.show_main_window(
+        back_button = ctk.CTkButton(converter_frame, text="Back", command=lambda: self.show_main_window(
             converter_window))
         convert_button = ctk.CTkButton(converter_frame, text="Convert", command=convert_currency)
         back_button.pack(pady=10, expand=True, side='left')
@@ -1034,13 +1058,362 @@ class AdminWindow(DefaultWindow):
         except Exception as e:
             return {"error": str(e)}  # Return error message in case of failure
 
-    def budgeting_calculator(self):
-        pass
+    def income_graph(self, incomes):
+        def refresh_graph():
+            income_window.withdraw()
+            income_window.quit()
+            self.income_graph(self.main_db.return_all_incomes())
+
+        self.remove_main_window()
+        income_window = ctk.CTk()
+        income_window.geometry("600x500+550+200")
+        income_window.title("Income Graph")
+
+        # Create a frame for the graph
+        graph_frame = ctk.CTkFrame(income_window)
+        graph_frame.pack(pady=20, padx=20, fill="both", expand=True)
+
+        # Prepare data for the graph
+        user_ids = [income['UserID'] for income in incomes]
+        salaries = [income['Salary'] for income in incomes]
+        levels = [income['Level'] for income in incomes]
+
+        # Create the bar chart
+        fig, ax = plt.subplots(figsize=(6, 4))
+        bars = ax.bar(user_ids, salaries, color='skyblue', edgecolor='black')
+
+        for bar, level in zip(bars, levels):
+            ax.text(
+                bar.get_x() + bar.get_width() / 2,  # X position (center of the bar)
+                bar.get_height() / 2,  # Y position (middle of the bar)
+                f'{level}',  # Text (level value)
+                ha='center', va='center',  # Center alignment
+                fontsize=10, color='black',  # Font size and color
+                weight='bold'  # Bold text for visibility
+            )
+        # Customize the graph
+        ax.set_title("Income by User", fontsize=16)
+        ax.set_xlabel("UserID", fontsize=12)
+        ax.set_ylabel("Salary", fontsize=12)
+        ax.grid(axis='y', linestyle='--', alpha=0.7)
+
+        # Embed the plot into the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=graph_frame)
+        canvas.draw()
+        canvas.get_tk_widget().pack(fill="both", expand=True)
+
+        # Back and Refresh Buttons
+        back_button = ctk.CTkButton(income_window, text="Back", command=lambda: self.show_main_window(income_window))
+        refresh_button = ctk.CTkButton(income_window, text="Refresh Graph", command=refresh_graph)
+
+        back_button.pack(padx=10, pady=10, expand=True, side='left')
+        refresh_button.pack(padx=10, pady=10, expand=True, side='right')
+
+        income_window.mainloop()
+
+    def display_calculators(self):
+        self.remove_main_window()
+        calculators_window = ctk.CTk()
+        calculators_window.title("Calculators")
+        calculators_window.geometry("400x247+550+200")
+        calculators_frame = ctk.CTkFrame(calculators_window)
+        calculators_frame.pack(fill="both", expand=True)
+        loan_calculator_button = ctk.CTkButton(calculators_frame, text="Loan calculator", command=lambda: (
+            calculators_window.withdraw(), self.loan_calculator()))
+        loan_calculator_button.pack(expand=True, fill='both', side='left', padx=10, pady=10)
+        budgeting_calculator_button = ctk.CTkButton(calculators_frame, text="Budgeting calculator", command=lambda: (
+            calculators_window.withdraw(), self.budgeting_calculator()))
+        budgeting_calculator_button.pack(expand=True, fill='both', side='right', padx=10, pady=10)
+
+        back_button = ctk.CTkButton(calculators_window, text="Back", width=100, command=lambda: self.show_main_window(
+            calculators_window))
+        back_button.pack(padx=10, pady=10, side='left')
+        calculators_window.mainloop()
 
     def loan_calculator(self):
+        loan_window = ctk.CTk()
+        loan_window.geometry("517x320+550+200")
+        loan_window.title("Loan Calculator")
+
+        # Frame for the loan calculator UI
+        loan_frame = ctk.CTkFrame(loan_window)
+        loan_frame.pack(pady=20, padx=20, fill="both", expand=True)
+
+        # Title Label
+        title_label = ctk.CTkLabel(loan_frame, text="Loan Calculator", font=("Arial", 16))
+        title_label.pack(pady=10)
+
+        # Entry for Loan Amount
+        loan_amount_entry = ctk.CTkEntry(loan_frame, width=160)
+        MyCustomFunctions.EntryPlaceHolderText(loan_frame, loan_amount_entry, "Loan Amount")
+        loan_amount_entry.pack(pady=5)
+
+        # Entry for Annual Interest Rate
+        interest_rate_entry = ctk.CTkEntry(loan_frame, width=160)
+        MyCustomFunctions.EntryPlaceHolderText(loan_frame, interest_rate_entry, "Annual Interest Rate (%)")
+        interest_rate_entry.pack(pady=5)
+
+        # Entry for Loan Term (in months)
+        loan_term_entry = ctk.CTkEntry(loan_frame, width=160)
+        MyCustomFunctions.EntryPlaceHolderText(loan_frame, loan_term_entry, "Loan Term (Months)")
+        loan_term_entry.pack(pady=5)
+
+        # Result Labels
+        monthly_payment_label = ctk.CTkLabel(loan_frame, text="Monthly Payment: -", font=("Arial", 14))
+        monthly_payment_label.pack(pady=5)
+
+        total_payment_label = ctk.CTkLabel(loan_frame, text="Total Payment: -", font=("Arial", 14))
+        total_payment_label.pack(pady=5)
+
+        # Calculate Button
+        def calculate_loan():
+            try:
+                # Get user inputs
+                loan_amount = float(loan_amount_entry.get())
+                annual_interest_rate = float(interest_rate_entry.get()) / 100  # Convert % to decimal
+                loan_term_months = int(loan_term_entry.get())
+
+                # Monthly Interest Rate
+                monthly_interest_rate = annual_interest_rate / 12
+
+                # Loan formula: M = P * r * (1 + r)^n / [(1 + r)^n - 1]
+                numerator = loan_amount * monthly_interest_rate * ((1 + monthly_interest_rate) ** loan_term_months)
+                denominator = ((1 + monthly_interest_rate) ** loan_term_months) - 1
+
+                # Monthly payment
+                monthly_payment = numerator / denominator if denominator != 0 else 0
+
+                # Total payment
+                total_payment = monthly_payment * loan_term_months
+
+                # Update result labels
+                monthly_payment_label.configure(text=f"Monthly Payment: {monthly_payment:.2f}")
+                total_payment_label.configure(text=f"Total Payment: {total_payment:.2f}")
+
+            except ValueError:
+                # Handle invalid inputs
+                monthly_payment_label.configure(text="Error: Invalid Input")
+                total_payment_label.configure(text="")
+
+        back_button = ctk.CTkButton(loan_frame, text="Back", command=lambda: (loan_window.withdraw(),
+                                                                              self.display_calculators()))
+        calculate_button = ctk.CTkButton(loan_frame, text="Calculate", command=calculate_loan)
+        back_button.pack(pady=10, padx=15, side='left', expand=True)
+        calculate_button.pack(pady=10, padx=15, side='right', expand=True)
+
+        loan_window.mainloop()
+
+    def budgeting_calculator(self):
+        self.remove_main_window()
+        budget_window = ctk.CTk()
+        budget_window.geometry("500x400+550+200")
+        budget_window.title("Budget Calculator")
+
+        def get_monthly_expenses():
+            expenses = self.main_db.return_all_expenses()
+            monthly_totals = defaultdict(Decimal)  # Dictionary to store monthly totals
+            for expense in expenses:
+                expense_month = expense['Date'].strftime('%Y-%m')  # Get year-month as string
+                monthly_totals[expense_month] += expense['Quantity'] * expense['Price']  # Add total for this expense
+
+            # Step 2: Calculate average monthly expense for the current year
+            current_year = date.today().year
+            year_months = [month for month in monthly_totals if month.startswith(str(current_year))]
+            if year_months:
+                average_monthly_expense = sum(monthly_totals[month] for month in year_months) / len(year_months)
+            else:
+                average_monthly_expense = 0  # Handle no expenses case
+            return average_monthly_expense
+
+        # Frame for the budget calculator UI
+        budget_frame = ctk.CTkFrame(budget_window)
+        budget_frame.pack(pady=20, padx=20, fill="both", expand=True)
+
+        # Title Label
+        title_label = ctk.CTkLabel(budget_frame, text="Budget Calculator", font=("Arial", 16))
+        title_label.pack(pady=10)
+
+        # Entry for Target Budget
+        target_budget_entry = ctk.CTkEntry(budget_frame, width=160)
+        MyCustomFunctions.EntryPlaceHolderText(budget_frame, target_budget_entry, "Target Budget Per Month")
+        target_budget_entry.pack(pady=10)
+
+        # Result Labels
+        average_expenses_label = ctk.CTkLabel(budget_frame, text=f"Average Monthly Expenses: {get_monthly_expenses()}",
+                                              font=("Arial", 14))
+        average_expenses_label.pack(pady=10)
+
+        target_result_label = ctk.CTkLabel(budget_frame, text="Target Status:", font=("Arial", 14))
+        target_result_label.pack(pady=10)
+
+        def calculate_budget():
+            average_monthly_expense = get_monthly_expenses()
+
+            # Step 3: Compare with user target
+            try:
+                target_budget = float(target_budget_entry.get())
+                if average_monthly_expense < target_budget:
+                    target_status = "Within budget"
+                elif average_monthly_expense == target_budget:
+                    target_status = "On budget"
+                else:
+                    target_status = "Over Budget"
+            except ValueError:
+                target_status = "Invalid Target Entered"
+
+            # Update Result Labels
+            average_expenses_label.configure(text=f"Average Monthly Expenses: {average_monthly_expense:.2f}")
+            target_result_label.configure(text=f"Target Status: {target_status}")
+
+        # Calculate Button
+        calculate_button = ctk.CTkButton(budget_frame, text="Calculate", command=calculate_budget)
+        calculate_button.pack(pady=20, side='right', expand=True)
+        back_button = ctk.CTkButton(budget_frame, text="Back", command=lambda: (budget_window.withdraw(),
+                                                                                self.display_calculators()))
+        back_button.pack(pady=20, side='left', expand=True)
+
+        budget_window.mainloop()
+
+    def create_database_tab(self):
+        database_tab = self.nb.tab("Database")
+        add_test_data_button = ctk.CTkButton(database_tab, command=self.add_test_data,
+                                             width=200, height=100, text="Add Test Data",
+                                             font=("Arial", 16))
+        add_test_data_button.place(x=175, y=100)
+        import_data_button = ctk.CTkButton(database_tab, command=self.import_data,
+                                           width=200, height=100, text="Import Data",
+                                           font=("Arial", 16))
+        import_data_button.place(x=450, y=100)
+        show_database_structure_button = ctk.CTkButton(database_tab, command=self.display_database_structure,
+                                                       width=200, height=100, text="Database Structure",
+                                                       font=("Arial", 16))
+        show_database_structure_button.place(x=175, y=250)
+        wipe_database_button = ctk.CTkButton(database_tab, command=self.wipe_database,
+                                             width=200, height=100, text="Wipe Database",
+                                             font=("Arial", 16))
+        wipe_database_button.place(x=450, y=250)
+
+    def display_database_structure(self):
+        self.remove_main_window()
+        db_window = ctk.CTkToplevel(self.parent)
+        db_window.geometry("800x600+550+200")
+        db_window.title("Database Structure Viewer")
+
+        def generate_schema():
+            # Step 1: Define database URL and output file
+            db_url = "mysql+mysqlconnector://expensedatabase:&FNBra!4117LVv@db4free.net/expensedatabase"
+            output_file = "ProjectImages/DatabaseStructure.png"
+
+            # Step 2: Generate schema diagram using ERAlchemy
+            try:
+                subprocess.run(["eralchemy", "-i", db_url, "-o", output_file], check=True)
+            except subprocess.CalledProcessError as e:
+                return e
+            # Load and display the image
+            try:
+                database_structure_image_path = output_file
+                database_structure_image = Image.open(database_structure_image_path)
+                database_structure_image = database_structure_image.resize((660, 440))
+                database_structure_image = ctk.CTkImage(light_image=database_structure_image, size=(660, 440))
+                img_label = ctk.CTkLabel(schema_frame, image=database_structure_image, text="")
+                img_label.pack(fill="both", expand=True)
+            except Exception as e:
+                img_label.configure(text=f"Error displaying schema image: {e}")
+
+        # Frame for database schema viewer
+        schema_frame = ctk.CTkFrame(db_window)
+        schema_frame.pack(fill="both", expand=True)
+
+        # Title Label
+        title_label = ctk.CTkLabel(schema_frame, text="Database Structure", font=("Arial", 16))
+        title_label.pack(pady=10)
+
+        # Generate schema on load
+        generate_schema()
+
+        # Back Button
+        back_button = ctk.CTkButton(db_window, text="Back",
+                                    command=lambda: (db_window.withdraw(), self.show_main_window()))
+        back_button.pack(pady=10, padx=20, side='left')
+
+        db_window.mainloop()
+
+    def add_test_data(self):
         pass
 
-    def create_testing_tab(self):
+    def import_data(self):
+        try:
+            self.remove_main_window()
+            # Create the import window
+            import_window = ctk.CTk()
+            import_window.title("Import Data")
+            import_window.geometry("400x200+760+200")
+            import_window.resizable(False, False)
+
+            # Define callback to select a file
+            def select_file(selection):
+                file_path = filedialog.askopenfilename(
+                    title="Select an Excel File",
+                    filetypes=[("Excel Files", "*.xlsx *.xls")]
+                )
+                if not file_path:
+                    MyMessageBoxes.ShowMessage().show_info("No file selected.")
+                    return
+
+                try:
+                    # Load data from the selected file
+                    data = pd.read_excel(file_path)
+
+                    # Ensure required columns exist based on the selection
+                    if selection == "Users":
+                        required_columns = {"UserID", "FirstName", "LastName", "Email", "PhoneNumber", "HashedPassword",
+                                            "Level", "Salary"}
+                    elif selection == "Expenses":
+                        required_columns = {"ExpenseID", "UserID", "Quantity", "Price", "Type", "Date"}
+                    else:
+                        MyMessageBoxes.ShowMessage().show_error("Invalid selection.")
+                        return
+
+                    if not required_columns.issubset(data.columns):
+                        MyMessageBoxes.ShowMessage().show_error(
+                            f"Missing required columns for {selection}: {required_columns - set(data.columns)}"
+                        )
+                        return
+
+                    # Call the database function
+                    self.main_db.insert_data_into_database(data)
+                except Exception as error:
+                    MyMessageBoxes.ShowMessage().show_error(f"Error processing file: {error}")
+
+            # Option menu for selecting Users or Expenses
+            selection_label = ctk.CTkLabel(import_window, text="Select Data Type to Import:")
+            selection_label.pack(pady=(20, 10))
+
+            options = ["Users", "Expenses"]
+            selection_menu = ctk.CTkOptionMenu(import_window, values=options)
+            selection_menu.pack(pady=(0, 20))
+
+            # Import button to handle file selection and processing
+            import_button = ctk.CTkButton(
+                import_window,
+                text="Import",
+                command=lambda: select_file(selection_menu.get()),
+            )
+            import_button.pack(pady=10, padx=10, side='right')
+
+            # Back button to return to the main window
+            back_button = ctk.CTkButton(
+                import_window,
+                text="Back",
+                command=lambda: (import_window.withdraw(), self.show_main_window()),
+            )
+            back_button.pack(pady=10, padx=10, side='left')
+            import_window.mainloop()
+
+        except Exception as e:
+            MyMessageBoxes.ShowMessage().show_error(f"An error occurred in the import process: {e}")
+
+    def wipe_database(self):
         pass
 
 

@@ -5,7 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4223b0cb-600c-4d4d-bb0c-1363f4ef671e" name="Changes" comment="Updating progress">
+      <change afterPath="$PROJECT_DIR$/ProjectWriteUp/Analysis - chapter 1.docx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ProjectWriteUp/Design - chapter 2.docx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ProjectWriteUp/Marking Grid.dotx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ProjectWriteUp/NEW Development and Testing .docx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ProjectWriteUp/NEW Evaluation.docx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MyDatabase.py" beforeDir="false" afterPath="$PROJECT_DIR$/MyDatabase.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MyExpenseWindow.py" beforeDir="false" afterPath="$PROJECT_DIR$/MyExpenseWindow.py" afterDir="false" />
     </list>
@@ -105,6 +111,7 @@
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\camer\PycharmProjects\MyProject\ProjectImages" />
+      <recent name="C:\Users\camer\PycharmProjects\MyProject\ProjectWriteUp" />
       <recent name="C:\Users\camer\PycharmProjects\MyProject" />
     </key>
   </component>
@@ -739,23 +746,14 @@
       <workItem from="1735986994374" duration="9300000" />
       <workItem from="1736075316537" duration="9545000" />
       <workItem from="1736153646702" duration="1145000" />
-      <workItem from="1736333095851" duration="5045000" />
-    </task>
-    <task id="LOCAL-00001" summary="created my_message_boxes">
-      <option name="closed" value="true" />
-      <created>1714578939901</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1714578939901</updated>
-    </task>
-    <task id="LOCAL-00002" summary="created my_message_boxes">
-      <option name="closed" value="true" />
-      <created>1714579635268</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1714579635268</updated>
+      <workItem from="1736333095851" duration="5513000" />
+      <workItem from="1736351199260" duration="6351000" />
+      <workItem from="1736409331439" duration="5155000" />
+      <workItem from="1736434165440" duration="3504000" />
+      <workItem from="1736443383504" duration="1837000" />
+      <workItem from="1736457442415" duration="2004000" />
+      <workItem from="1736459559013" duration="5701000" />
+      <workItem from="1736498904047" duration="5177000" />
     </task>
     <task id="LOCAL-00003" summary="modified my_message_boxes">
       <option name="closed" value="true" />
@@ -1125,7 +1123,31 @@
       <option name="project" value="LOCAL" />
       <updated>1736089712318</updated>
     </task>
-    <option name="localTasksCounter" value="49" />
+    <task id="LOCAL-00049" summary="Finished expense_vs_income window and currency_converter window in budgeting tab. Need to finish rest of budgeting tab and testing tab">
+      <option name="closed" value="true" />
+      <created>1736338526547</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1736338526547</updated>
+    </task>
+    <task id="LOCAL-00050" summary="Removed unnecessary text, need to add comments later">
+      <option name="closed" value="true" />
+      <created>1736338595399</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1736338595400</updated>
+    </task>
+    <task id="LOCAL-00051" summary="Updating progress">
+      <option name="closed" value="true" />
+      <created>1736338606739</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1736338606741</updated>
+    </task>
+    <option name="localTasksCounter" value="52" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1161,8 +1183,6 @@
     <ignored-roots>
       <path value="$PROJECT_DIR$/MyProject" />
     </ignored-roots>
-    <MESSAGE value="updated validator" />
-    <MESSAGE value="created password strength checker in validator" />
     <MESSAGE value="updated project tester" />
     <MESSAGE value="saving current changes, and starting MyAccountsDatabase.py" />
     <MESSAGE value="saving current changes" />
@@ -1185,16 +1205,18 @@
     <MESSAGE value="Started edit_expense tab, need to complete" />
     <MESSAGE value="Finished Expense / User editor, fixed bugs in Treeviews, updated database code" />
     <MESSAGE value="Finished accounts tab, need to complete extras tab" />
+    <MESSAGE value="Finished expense_vs_income window and currency_converter window in budgeting tab. Need to finish rest of budgeting tab and testing tab" />
+    <MESSAGE value="Removed unnecessary text, need to add comments later" />
     <MESSAGE value="Updating progress" />
     <option name="LAST_COMMIT_MESSAGE" value="Updating progress" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/MyProject$MyMessageBoxes.coverage" NAME="MyMessageBoxes Coverage Results" MODIFIED="1735491850366" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MyProject$MyAccountsDatabase.coverage" NAME="MyAccountsDatabase Coverage Results" MODIFIED="1721296196057" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/MyProject$MyDatabase.coverage" NAME="MyDatabase Coverage Results" MODIFIED="1736333285478" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MyProject$MyDatabase.coverage" NAME="MyDatabase Coverage Results" MODIFIED="1736370099136" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MyProject$ctkmessagebox.coverage" NAME="ctkmessagebox Coverage Results" MODIFIED="1730290129783" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/venv/Lib/site-packages/CTkMessagebox" />
     <SUITE FILE_PATH="coverage/MyProject$LoginScreen.coverage" NAME="LoginScreen Coverage Results" MODIFIED="1735038031161" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/MyProject$MyExpenseWindow.coverage" NAME="MyExpenseWindow Coverage Results" MODIFIED="1736338160229" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MyProject$MyExpenseWindow.coverage" NAME="MyExpenseWindow Coverage Results" MODIFIED="1736503205788" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MyProject$.coverage" NAME=" Coverage Results" MODIFIED="1718014623098" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MyProject$test.coverage" NAME="test Coverage Results" MODIFIED="1730288200908" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MyProject$PasswordHasher.coverage" NAME="PasswordHasher Coverage Results" MODIFIED="1731246795743" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

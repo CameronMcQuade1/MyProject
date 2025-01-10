@@ -154,18 +154,15 @@ class AccountsDatabase:
             cursor = self.main_db.cursor(dictionary=True)
             if self.check_user_level(current_user) == 0:
                 cursor.execute("""
-                    SELECT ExpenseID, UserID, Type, Quantity, Price, Date 
+                    SELECT ExpenseID, UserID, Name, Type, Quantity, Price, Date 
                     FROM expensetable 
                     WHERE UserID = %s
                 """, (current_user,))
+                expenses = cursor.fetchall()
+                self.main_db.commit()
+                cursor.close()
             else:
-                cursor.execute("""
-                                    SELECT ExpenseID, UserID, Type, Quantity, Price, Date 
-                                    FROM expensetable 
-                                """)
-            expenses = cursor.fetchall()
-            self.main_db.commit()
-            cursor.close()
+                expenses = self.return_all_expenses()
             return expenses
         except Exception as given_error:
             return given_error
@@ -313,6 +310,9 @@ class AccountsDatabase:
 
             if edit_expenses is not None:
                 query = """UPDATE expensetable SET """
+                if 'Name' in changes:
+                    updates.append("Name = %s")
+                    params.append(changes['Name'])
                 if 'Quantity' in changes:
                     updates.append("Quantity = %s")
                     params.append(changes['Quantity'])
@@ -389,6 +389,78 @@ class AccountsDatabase:
         except Exception as e:
             return e
 
+    def insert_data_into_database(self, data, selection, callback_function):
+        cursor = self.main_db.cursor()
+
+        if selection == "Expenses":
+            # Preparing the values for inserting expenses
+            values = [
+                (
+                    row['ExpenseID'], row['UserID'], row['Name'], row['Type'],
+                    row['Quantity'], row['Price'], row['Date']
+                )
+                for _, row in data.iterrows()
+            ]
+            query = """
+            INSERT INTO expensetable (ExpenseID, UserID, Name, Type, Quantity, Price, Date)
+            VALUES (%s, %s, %s, %s, %s, %s, %s);
+            """
+            try:
+                cursor.executemany(query, values)
+                self.main_db.commit()
+                cursor.close()
+                MyMessageBoxes.ShowMessage().show_info("Successfully imported expenses")
+                callback_function()
+            except Exception as error:
+                raise RuntimeError(f"Database error: {error}")
+
+        elif selection == "Users":
+            # Preparing the values for inserting users (UserID, FirstName, LastName, Email, etc.)
+            user_values = [
+                (
+                    row['UserID'], row['FirstName'], row['LastName'], row['Email'],
+                    row['PhoneNumber'], row['HashedPassword']
+                )
+                for _, row in data.iterrows()
+            ]
+
+            # Prepare salary values (UserID, Level, Salary)
+            salary_values = [
+                (
+                    row['UserID'], row['Level'], row['Salary']
+                )
+                for _, row in data.iterrows()
+            ]
+
+            # Insert user data into 'usertable'
+            first_query = """
+            INSERT INTO usertable (UserID, FirstName, LastName, Email, PhoneNumber, HashedPassword)
+            VALUES (%s, %s, %s, %s, %s, %s);
+            """
+
+            # Insert salary data into 'salarytable'
+            second_query = """
+            INSERT INTO salarytable (UserID, Level, Salary) VALUES (%s, %s, %s);
+            """
+
+            try:
+                # Insert user data first
+                cursor.executemany(first_query, user_values)
+
+                # Insert salary data second
+                cursor.executemany(second_query, salary_values)
+
+                # Commit the changes to the database
+                self.main_db.commit()
+                cursor.close()
+
+                # Inform the user that the import was successful
+                MyMessageBoxes.ShowMessage().show_info("Successfully imported users and salaries")
+                callback_function()
+
+            except Exception as error:
+                raise RuntimeError(f"Database error: {error}")
+
 
 class ExpenseViewer:
     def __init__(self, user_id, parent, submit_frame, on_remove_callback, show_users=None, show_income=None):
@@ -418,9 +490,9 @@ class ExpenseViewer:
             if self.show_users:
                 headers = ["Select", "UserID", "FirstName", "LastName", "Email", "PhoneNumber", "Level", "Salary"]
             elif not self.show_users and self.db.check_user_level(self.user_id) == 0:
-                headers = ["Select", "ExpenseID", "Quantity", "Price", "Date"]
+                headers = ["Select", "ExpenseID", "Name", "Quantity", "Price", "Date"]
             else:
-                headers = ["Select", "ExpenseID", "UserID", "Quantity", "Price", "Type", "Date"]
+                headers = ["Select", "ExpenseID", "UserID", "Name", "Quantity", "Price", "Type", "Date"]
             for col, header in enumerate(headers):
                 label = ctk.CTkLabel(self.scrollable_frame, text=header, font=("Arial", 14, "bold"))
                 label.grid(row=0, column=col, padx=10, pady=5)
@@ -448,19 +520,21 @@ class ExpenseViewer:
 
                 # Labels for each data column
                 ctk.CTkLabel(self.scrollable_frame, text=str(info["ExpenseID"])).grid(row=row, column=1, padx=10)
-                ctk.CTkLabel(self.scrollable_frame, text=str(info["Quantity"])).grid(row=row, column=2, padx=10)
-                ctk.CTkLabel(self.scrollable_frame, text=f"${info['Price']:.2f}").grid(row=row, column=3, padx=10)
-                ctk.CTkLabel(self.scrollable_frame, text=str(info["Date"])).grid(row=row, column=4, padx=10)
+                ctk.CTkLabel(self.scrollable_frame, text=str(info["Name"])).grid(row=row, column=2, padx=10)
+                ctk.CTkLabel(self.scrollable_frame, text=str(info["Quantity"])).grid(row=row, column=3, padx=10)
+                ctk.CTkLabel(self.scrollable_frame, text=f"${info['Price']:.2f}").grid(row=row, column=4, padx=10)
+                ctk.CTkLabel(self.scrollable_frame, text=str(info["Date"])).grid(row=row, column=5, padx=10)
             elif not self.show_users and self.db.check_user_level(self.user_id) == 1:
                 self.information_checkboxes.append((checkbox_var, info["ExpenseID"]))
 
                 # Labels for each data column
                 ctk.CTkLabel(self.scrollable_frame, text=str(info["ExpenseID"])).grid(row=row, column=1, padx=10)
                 ctk.CTkLabel(self.scrollable_frame, text=str(info["UserID"])).grid(row=row, column=2, padx=10)
-                ctk.CTkLabel(self.scrollable_frame, text=str(info["Quantity"])).grid(row=row, column=3, padx=10)
-                ctk.CTkLabel(self.scrollable_frame, text=f"${info['Price']:.2f}").grid(row=row, column=4, padx=10)
-                ctk.CTkLabel(self.scrollable_frame, text=str(info["Type"])).grid(row=row, column=5, padx=10)
-                ctk.CTkLabel(self.scrollable_frame, text=str(info["Date"])).grid(row=row, column=6, padx=10)
+                ctk.CTkLabel(self.scrollable_frame, text=str(info["Name"])).grid(row=row, column=3, padx=10)
+                ctk.CTkLabel(self.scrollable_frame, text=str(info["Quantity"])).grid(row=row, column=4, padx=10)
+                ctk.CTkLabel(self.scrollable_frame, text=f"${info['Price']:.2f}").grid(row=row, column=5, padx=10)
+                ctk.CTkLabel(self.scrollable_frame, text=str(info["Type"])).grid(row=row, column=6, padx=10)
+                ctk.CTkLabel(self.scrollable_frame, text=str(info["Date"])).grid(row=row, column=7, padx=10)
             else:
                 self.information_checkboxes.append((checkbox_var, info["UserID"]))
 
@@ -509,12 +583,12 @@ class DisplayExcelSpreadsheet:
             if not show_users:
                 self.tree = ttk.Treeview(
                     self.excel_spreadsheet_frame,
-                    columns=("ExpenseID", "UserID", "Quantity", "Price", "Type", "Date"),
+                    columns=("ExpenseID", "UserID", "Name", "Quantity", "Price", "Type", "Date"),
                     show="headings",
                 )
                 # Define headings and center-align text below
-                headings = [("ExpenseID", 30), ("UserID", 30), ("Quantity", 70), ("Price", 60), ("Type", 50),
-                            ("Date", 100)]
+                headings = [("ExpenseID", 30), ("UserID", 30), ("Name", 40), ("Quantity", 70), ("Price", 60),
+                            ("Type", 50), ("Date", 100)]
                 for col, width in headings:
                     self.tree.heading(col, text=col)
                     self.tree.column(col, anchor="center", width=width)  # Center text and set column width
@@ -574,6 +648,7 @@ class DisplayExcelSpreadsheet:
                         values=(
                             expense.get("ExpenseID", ""),
                             expense.get("UserID", ""),
+                            expense.get("Name", ""),
                             expense.get("Quantity", 0),
                             f"£{expense.get('Price', 0):.2f}",
                             expense.get("Type", "Unknown"),
@@ -611,18 +686,19 @@ class DisplayExcelSpreadsheet:
             sheet.column_dimensions['C'].width = 10
             sheet.column_dimensions['D'].width = 10
             sheet.column_dimensions['E'].width = 10
-            sheet.column_dimensions['F'].width = 15
+            sheet.column_dimensions['F'].width = 10
+            sheet.column_dimensions['G'].width = 15
             if not self.show_users:
                 sheet.title = f"User Expenses {self.year if self.year else 'All'}"
 
                 # Define the headers and write them to the first row
-                headers = ["ExpenseID", "UserID", "Quantity", "Price", "Type", "Date"]
+                headers = ["ExpenseID", "UserID", "Name", "Quantity", "Price", "Type", "Date"]
                 sheet.append(headers)
 
                 # Add expense data rows to the sheet
                 for expense in self.information:
-                    sheet.append([expense["ExpenseID"], expense["UserID"], expense["Quantity"], expense["Price"],
-                                  expense["Type"], expense["Date"]])
+                    sheet.append([expense["ExpenseID"], expense["UserID"], expense["Name"], expense["Quantity"],
+                                  expense["Price"], expense["Type"], expense["Date"]])
 
                 # Determine the path to the Downloads folder
                 downloads_path = Path.home() / "Downloads"
@@ -714,8 +790,8 @@ class ExpenseEditor:
             headers = ["UserID", "Level", "Salary"]
             editable_fields = ["Level", "Salary"]
         else:
-            headers = ["ExpenseID", "UserID", "Quantity", "Price", "Type", "Date"]
-            editable_fields = ["Quantity", "Price", "Type"]
+            headers = ["ExpenseID", "UserID", "Name", "Quantity", "Price", "Type", "Date"]
+            editable_fields = ["Name", "Quantity", "Price", "Type"]
 
         # Add headers
         for col, header in enumerate(headers):
@@ -778,7 +854,7 @@ class ExpenseEditor:
 
 
 if __name__ == '__main__':
-    AccountsDatabase()
+    print(AccountsDatabase().return_all_incomes())
     '''
     fake_user = ["CM0003", "CAM", "MCQ", "CAM.MCQ@OUTLOOK.COM", "07483226639",
                  "EvEHoD5wIaiLak2xz/k6vA==$jMJ2m/pdg5EJfcI3e/GLZQWK7DR96RA/47NroTmLS8s=$100000", "0", "2"]

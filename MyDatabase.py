@@ -461,16 +461,45 @@ class AccountsDatabase:
             except Exception as error:
                 raise RuntimeError(f"Database error: {error}")
 
+    def return_user_hashed_password(self, given_user):
+        try:
+            cursor = self.main_db.cursor()
+            query = """SELECT HashedPassword FROM usertable WHERE UserID = %s;"""
+            cursor.execute(query, (given_user, ))
+            hashed_pass = cursor.fetchone()[0]
+            cursor.close()
+            return hashed_pass
+        except Exception as error:
+            return error
+
+    def wipe_database(self):
+        try:
+            cursor = self.main_db.cursor()
+            # Define the queries to wipe each table
+            queries = [
+                "DELETE FROM expensetable;",
+                "DELETE FROM salarytable;",
+                "DELETE FROM usertable;"]
+            # Execute each query in sequence
+            for query in queries:
+                cursor.execute(query)
+            # Commit the changes to the database
+            self.main_db.commit()
+            cursor.close()
+            MyMessageBoxes.ShowMessage().show_info("Database successfully wiped.")
+            return True
+        except Exception as error:
+            MyMessageBoxes.ShowMessage.show_info(f"Error wiping database: {error}")
+
 
 class ExpenseViewer:
-    def __init__(self, user_id, parent, submit_frame, on_remove_callback, show_users=None, show_income=None):
+    def __init__(self, user_id, parent, submit_frame, on_remove_callback, show_users=None):
         self.__parent = parent
         self.spreadsheet_frame = ctk.CTkFrame(parent)
         self.spreadsheet_frame.pack(expand=True, fill='both')
         self.db = AccountsDatabase()
         self.user_id = user_id
         self.show_users = show_users
-        self.show_income = show_income
         if self.show_users:
             self.information = self.db.return_all_users()
         elif not self.show_users and self.db.check_user_level(user_id) == 0:
@@ -565,13 +594,12 @@ class ExpenseViewer:
 
 
 class DisplayExcelSpreadsheet:
-    def __init__(self, user_id, parent, year=None, show_users=None, show_income=None):
+    def __init__(self, user_id, parent, year=None, show_users=None):
         self.parent = parent
         self.db = AccountsDatabase()
         self.user_id = user_id
         self.year = year
         self.show_users = show_users
-        self.show_income = show_income
         self.information = self.get_information()  # Fetch expenses based on the year filter
 
         # Frame for the Treeview display
@@ -618,10 +646,10 @@ class DisplayExcelSpreadsheet:
             self.display_expenses()
         else:
             if self.db.check_user_level(self.user_id) == 0:
-                ctk.CTkLabel(self.excel_spreadsheet_frame, text="No expenses found for your user.\n Only admins can see"
+                ctk.CTkLabel(self.excel_spreadsheet_frame, text="No data found for your user.\n Only admins can see"
                                                                 " all expenses.").place(x=100, y=100)
             else:
-                ctk.CTkLabel(self.excel_spreadsheet_frame, text="No expenses found in the database").place(x=100, y=100)
+                ctk.CTkLabel(self.excel_spreadsheet_frame, text="No data found in the database").place(relx=0.5, y=100)
 
     def get_information(self):
         """Fetch expenses for the user, optionally filtering by year."""
@@ -851,20 +879,3 @@ class ExpenseEditor:
             self.callback_function()
         else:
             MyMessageBoxes.ShowMessage().show_error("No edits detected")
-
-
-if __name__ == '__main__':
-    print(AccountsDatabase().return_all_incomes())
-    '''
-    fake_user = ["CM0003", "CAM", "MCQ", "CAM.MCQ@OUTLOOK.COM", "07483226639",
-                 "EvEHoD5wIaiLak2xz/k6vA==$jMJ2m/pdg5EJfcI3e/GLZQWK7DR96RA/47NroTmLS8s=$100000", "0", "2"]
-    user_id = fake_user[0]
-    first_name = fake_user[1]
-    last_name = fake_user[2]
-    email = fake_user[3]
-    phone_number = fake_user[4]
-    hashed_password = fake_user[5]
-    level = fake_user[6]
-    salary = fake_user[7]
-    AccountsDatabase().add_user_to_db(user_id, first_name, last_name, email, phone_number,
-                                      hashed_password, level, salary)'''

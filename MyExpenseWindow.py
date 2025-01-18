@@ -3,6 +3,7 @@ from PIL import Image
 import seaborn as sns
 import tkinter as tk
 from tkinter import ttk, filedialog
+from tkcalendar import DateEntry
 import pandas as pd
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.pipeline import make_pipeline
@@ -23,6 +24,8 @@ import matplotlib.pyplot as plt
 import requests
 from decimal import Decimal
 import subprocess
+
+import PasswordHasher
 
 
 class DefaultWindow:
@@ -68,16 +71,52 @@ class DefaultWindow:
     def menu_bar(self):
         main_bar = tk.Menu()
         self.parent.configure(menu=main_bar)
+
+        # Settings Menu
         settings_menu = tk.Menu(main_bar, tearoff=False)
         main_bar.add_cascade(label='Settings', menu=settings_menu)
-        settings_menu.add_command(label='Change Background Colour')
 
+        # Submenu for changing background color
+        self.bg_colour_menu = tk.Menu(settings_menu, tearoff=False)
+        settings_menu.add_cascade(label='Change Background Colour', menu=self.bg_colour_menu)
+
+        # Options for background color modes
+        self.color_modes = ["Light", "Dark"]
+        self.current_colour_mode = tk.StringVar(value="Light")  # Default selection
+        for mode in self.color_modes:
+            self.bg_colour_menu.add_radiobutton(
+                label=mode,
+                variable=self.current_colour_mode,
+                command=lambda: self.change_background_colour(self.current_colour_mode.get(), main_bar)
+            )
+
+        # Help Menu
         help_menu = tk.Menu(main_bar, tearoff=False)
         main_bar.add_cascade(label='Help', menu=help_menu)
-        help_menu.add_command(label='Frequently Asked Questions')
+        help_menu.add_command(label='Logging in', command=lambda:
+                              MyMessageBoxes.ShowMessage().show_info("Use the Username given to you in your email "
+                                                                     "and your password to log in.\nIf there are no "
+                                                                     "accounts in the database, you have to make "
+                                                                     "one for yourself."))
+        help_menu.add_command(label='Using the app', command=lambda:
+                              MyMessageBoxes.ShowMessage().show_info("Guide yourself through the app using the "
+                                                                     "tab bar at the top, there are many things to do."
+                                                                     "\nAdmin users are also given extra tabs in their "
+                                                                     "app."))
 
-        main_bar.add_command(label='Logout', command=lambda: (self.root.destroy(), main_bar.delete("Logout"),
-                                                              LoginScreen.MainLogin(self.parent)))
+        # Logout Option
+        main_bar.add_command(
+            label='Logout',
+            command=lambda: (self.root.destroy(), main_bar.delete("Logout"), LoginScreen.MainLogin(self.parent))
+        )
+
+    def change_background_colour(self, mode, bar):
+        if mode == "Light":
+            self.parent.configure(bg="white")
+            ctk.set_appearance_mode("light")
+        elif mode == "Dark":
+            self.parent.configure(bg="black")
+            ctk.set_appearance_mode("dark")
 
     def create_expense_label(self, parent, place_x, place_y):
         total_expenses_from_user = self.main_db.return_total_inputted_from_user(self.current_user)
@@ -194,30 +233,47 @@ class DefaultWindow:
                                     command=lambda: self.show_main_window(self.add_expense_window), width=140)
         back_button.place(x=50, y=240)
         submit_button = ctk.CTkButton(self.add_expense_frame, text="Submit",
-                                      width=140, command=self.submit_expense_db)
+                                      width=140, command=lambda: (self.add_expense_window.withdraw(),
+                                                                  self.submit_expense_db([
+                                                                      self.name_entry.get(), self.quantity_entry.get(),
+                                                                      self.price_entry.get(),
+                                                                      self.type_option_menu.get()], [
+                f"{MyDatabase.AccountsDatabase().return_total_expense_amount() + 1:06d}",  # Auto-generate ExpenseID
+                self.current_user,  # Use the current user ID
+                self.name_entry.get(),
+                self.quantity_entry.get(),
+                self.price_entry.get(),
+                self.type_option_menu.get(),
+                datetime.now().strftime('%Y-%m-%d')], self.add_expense_window)))
         submit_button.place(x=200, y=240)
 
         self.add_expense_window.mainloop()
 
-    def submit_expense_db(self):
-        inputs = [self.name_entry.get(), self.quantity_entry.get(), self.price_entry.get(),
-                  self.type_option_menu.get()]
+    def submit_expense_db(self, default_inputs, submitted_inputs, parent):
+        # Gather inputs
+        parent.withdraw()
         placeholders = ["Name", "Quantity", "Price", "Type:"]
-        invalid_fields = [placeholder for placeholder, value in zip(placeholders, inputs) if
-                          not value.strip() or value == placeholder]
+        invalid_fields = [
+            placeholder for placeholder, value in zip(placeholders, default_inputs)
+            if not str(value).strip() or value == placeholder
+        ]
+
+        # Validate inputs
         if invalid_fields:
             MyMessageBoxes.ShowMessage().show_error(
-                f"Ensure the following fields are filled correctly:\n{', '.join(invalid_fields)}.")
+                f"Ensure the following fields are filled correctly:\n{', '.join(invalid_fields)}."
+            )
+            parent.deiconify()
             return
-        inputs = [f"{MyDatabase.AccountsDatabase().return_total_expense_amount() + 1:06d}", self.current_user,
-                  self.name_entry.get(), self.quantity_entry.get(), self.price_entry.get(),
-                  self.type_option_menu.get(), datetime.now().strftime('%Y-%m-%d')]
+
+        # Try to submit the expense to the database
         try:
-            self.main_db.submit_expense_db(inputs)
+            self.main_db.submit_expense_db(submitted_inputs)
             MyMessageBoxes.ShowMessage().show_info("Expense added successfully.")
-            self.show_main_window(self.add_expense_window)
+            self.show_main_window()  # Navigate back to the main window
         except Exception as error:
-            MyMessageBoxes.ShowMessage().show_error(f"An error occurred: {error}")
+            MyMessageBoxes.ShowMessage().show_info(f"An error occurred: {error}")
+            parent.deiconify()
 
     def remove_expense(self):
         # Create a new CTk window
@@ -1339,7 +1395,77 @@ class AdminWindow(DefaultWindow):
         db_window.mainloop()
 
     def add_test_data(self):
-        pass
+        # Create a new CTk window
+        self.remove_main_window()
+        self.add_test_data_window = ctk.CTk()  # Or ctk.CTkToplevel(self.parent) to make it a child of the main window
+        self.add_test_data_frame = ctk.CTkFrame(self.add_test_data_window)
+        self.add_test_data_frame.pack(expand=True, fill="both")
+        self.add_test_data_window.title("Add Test Data")
+        self.add_test_data_window.geometry("400x300+700+200")  # Updated geometry
+
+        # Labels and inputs
+        name_label = ctk.CTkLabel(self.add_test_data_frame, text="Name:")
+        name_label.place(x=20, y=20)
+        name_entry = ctk.CTkEntry(self.add_test_data_frame, width=200)
+        name_entry.place(x=150, y=20)
+        MyCustomFunctions.EntryPlaceHolderText(self.add_test_data_frame, name_entry, "Name")
+
+        quantity_label = ctk.CTkLabel(self.add_test_data_frame, text="Quantity:")
+        quantity_label.place(x=20, y=60)
+        quantity_entry = ctk.CTkEntry(self.add_test_data_frame, width=200)
+        quantity_entry.place(x=150, y=60)
+        MyCustomFunctions.EntryPlaceHolderText(self.add_test_data_frame, quantity_entry, "Quantity")
+
+        price_label = ctk.CTkLabel(self.add_test_data_frame, text="Price:")
+        price_label.place(x=20, y=100)
+        price_entry = ctk.CTkEntry(self.add_test_data_frame, width=200)
+        price_entry.place(x=150, y=100)
+        MyCustomFunctions.EntryPlaceHolderText(self.add_test_data_frame, price_entry, "Price")
+
+        date_label = ctk.CTkLabel(self.add_test_data_frame, text="Date:")
+        date_label.place(x=20, y=140)
+        date_entry = DateEntry(self.add_test_data_frame, width=12, borderwidth=2)
+        date_entry.place(x=190, y=180)
+
+        type_label = ctk.CTkLabel(self.add_test_data_frame, text="Type:")
+        type_label.place(x=20, y=180)
+        type_options = [
+            "Rent", "Utilities", "Salaries", "Insurance", "Equipment", "Supplies",
+            "Marketing", "Services", "Training", "Travel", "Food", "Other"
+        ]
+        type_option_menu = ctk.CTkOptionMenu(self.add_test_data_frame, values=type_options)
+        type_option_menu.set("Type:")
+        type_option_menu.place(x=150, y=180)
+
+        user_label = ctk.CTkLabel(self.add_test_data_frame, text="User:")
+        user_label.place(x=20, y=220)
+        user_entry = ctk.CTkEntry(self.add_test_data_frame, width=200)
+        MyCustomFunctions.EntryPlaceHolderText(self.add_test_data_frame, user_entry, self.current_user)
+        user_entry.configure(state="disabled")
+        user_entry.place(x=150, y=220)
+
+        # Buttons
+        back_button = ctk.CTkButton(
+            self.add_test_data_frame,
+            text="Back",
+            command=lambda: (self.add_test_data_window.withdraw(), self.show_main_window(self.add_test_data_window)),
+            width=140
+        )
+        back_button.place(x=50, y=260)
+
+        submit_button = ctk.CTkButton(
+            self.add_test_data_frame,
+            text="Submit",
+            width=140,
+            command=lambda: (self.add_test_data_window.withdraw(), self.submit_expense_db([name_entry.get(),
+                            quantity_entry.get(), price_entry.get(), type_option_menu.get(), datetime.strptime(
+                            date_entry.get(), "%m/%d/%y").strftime('%Y-%m-%d')], [f"{
+            self.main_db.return_total_expense_amount() + 1:06d}", self.current_user, name_entry.get(),
+            quantity_entry.get(), price_entry.get(), type_option_menu.get(), datetime.strptime(date_entry.get(),
+            "%m/%d/%y").strftime('%Y-%m-%d')], self.add_test_data_window)))
+        submit_button.place(x=200, y=260)
+
+        self.add_test_data_window.mainloop()
 
     def import_data(self):
         try:
@@ -1381,7 +1507,8 @@ class AdminWindow(DefaultWindow):
                         return
 
                     # Call the database function
-                    self.main_db.insert_data_into_database(data)
+                    self.main_db.insert_data_into_database(data, selection_menu.get(), lambda: (
+                        import_window.withdraw(), self.show_main_window()))
                 except Exception as error:
                     MyMessageBoxes.ShowMessage().show_error(f"Error processing file: {error}")
 
@@ -1414,12 +1541,53 @@ class AdminWindow(DefaultWindow):
             MyMessageBoxes.ShowMessage().show_error(f"An error occurred in the import process: {e}")
 
     def wipe_database(self):
-        pass
+        self.remove_main_window()
+        wipe_db_window = ctk.CTkToplevel()
+        wipe_db_window.title("Wipe Database")
+        wipe_db_window.geometry("400x200+760+200")
+        wipe_db_window.resizable(False, False)
+        db_frame = ctk.CTkFrame(wipe_db_window)
+        db_frame.pack(expand=True, fill='both')
+        wipe_db_label = ctk.CTkLabel(db_frame, text="Enter your password below to wipe the database:", font=(
+            "Arial", 14))
+        wipe_db_label.pack(pady=10, fill='both')
+        db_password_entry = ctk.CTkEntry(db_frame)
+        MyCustomFunctions.EntryPlaceHolderText(db_frame, db_password_entry, "Password:")
+        MyCustomFunctions.ShowHidePasswordText(db_password_entry)
+        MyCustomFunctions.ShowHidePasswordWidget(db_frame, db_password_entry, 0.73, 0.4)
+        db_password_entry.place(relx=0.5, rely=0.4, anchor='center')
+        back_button = ctk.CTkButton(db_frame, text="Back", command=lambda: (wipe_db_window.withdraw(),
+                                                                            self.show_main_window()))
+        back_button.place(relx=0.2, rely=0.9, anchor='center')
+        wipe_db_button = ctk.CTkButton(db_frame, text="Wipe Database", command=lambda: self.try_wipe_db(
+            self.current_user, db_password_entry.get(), wipe_db_window))
+        wipe_db_button.place(relx=0.8, rely=0.9, anchor='center')
+
+    def try_wipe_db(self, current_user, given_password, show_hide_window):
+        try:
+            if PasswordHasher.Hasher().verify_password(self.main_db.return_user_hashed_password(current_user),
+                                                       given_password):
+                show_hide_window.withdraw()
+                confirm_dp_wipe = MyMessageBoxes.ShowMessage().ask_question("Are you sure you want to wipe the"
+                                                                            " database?", "Yes", "No",
+                                                                            "Back", "Back")
+                if confirm_dp_wipe == "Back":
+                    show_hide_window.deiconify()
+                elif confirm_dp_wipe == "No":
+                    self.show_main_window()
+                elif confirm_dp_wipe == "Yes":
+                    MyDatabase.DisplayExcelSpreadsheet(self.current_user, ctk.CTk()).download_expenses()
+                    MyDatabase.DisplayExcelSpreadsheet(self.current_user, ctk.CTk(),
+                                                       show_users=True).download_expenses()
+                    MyMessageBoxes.ShowMessage().show_info(f"Downloaded current database, wiping now.")
+                    self.main_db.wipe_database()
+                    self.show_main_window()
+        except Exception as e:
+            return e
 
 
 if __name__ == '__main__':
     ctk.set_appearance_mode("light")
-    ctk.set_default_color_theme("blue")
 
     root = ctk.CTk()
     root.title("Expense Tracker")

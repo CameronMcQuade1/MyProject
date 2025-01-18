@@ -10,12 +10,8 @@ class MainLogin:
     def __init__(self, parent):
         self.parent = parent
 
-        # Set appearance mode and color theme
-        ctk.set_appearance_mode("light")
-        ctk.set_default_color_theme("blue")
-
         # Creating a customtkinter frame for the login screen
-        self.login_screen = ctk.CTkFrame(parent, fg_color="white")
+        self.login_screen = ctk.CTkFrame(parent)
         self.User = ctk.StringVar()
         self.Password = ctk.StringVar()
         self.main_frame()
@@ -39,9 +35,6 @@ class MainLogin:
         # Login and Forgot Password buttons
         self.login_button = ctk.CTkButton(self.login_frame, command=self.try_login, text="Login", height=40, width=120,
                                           corner_radius=20)
-        self.forgot_pass = ctk.CTkButton(self.login_frame, command=self.new_password, text="Forgot Password?",
-                                         height=30, width=150, corner_radius=20, fg_color="transparent",
-                                         text_color=("gray20", "gray80"))
 
         # View password button
         ShowHidePasswordWidget(self.login_frame, self.enter_password, 0.87, 0.5)
@@ -50,7 +43,6 @@ class MainLogin:
         self.enter_username.place(relx=0.5, rely=0.3, anchor='center')
         self.enter_password.place(relx=0.5, rely=0.5, anchor='center')
         self.login_button.place(relx=0.5, rely=0.7, anchor='center')
-        self.forgot_pass.place(relx=0.5, rely=0.85, anchor='center')
 
         # Event binding for custom placeholder text and show/hide password functionality
         EntryPlaceHolderText(self.login_screen, self.enter_username, 'Account ID')
@@ -71,13 +63,6 @@ class MainLogin:
                 MyMessageBoxes.ShowMessage().show_warning("Password is incorrect")
         else:
             MyMessageBoxes.ShowMessage().show_error("Account ID is incorrect")
-
-    def new_password(self):
-        # Implementation for new password functionality
-        pass
-
-    def remove_login_frame(self):
-        self.login_screen.destroy()
 
 
 if __name__ == "__main__":

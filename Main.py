@@ -25,8 +25,11 @@ class MainApp:
             elif msg == "Okay":
                 self.root.geometry("325x175+750+250")
                 CreateAccountScreen.CreateAccount(self.root)
-            else: # msg = help
-                pass
+            else:
+                MyMessageBoxes.ShowMessage.show_info("No previous accounts have been detected. You will now need to "
+                                                     "make one.")
+                self.root.geometry("325x175+750+250")
+                CreateAccountScreen.CreateAccount(self.root)
         else:
             LoginScreen.MainLogin(self.root)
 
@@ -38,8 +41,6 @@ class MainApp:
         centre_y = (screen_height / 2) - (height / 2)
         target.geometry('%dx%d+%d+%d' % (width, height, centre_x, centre_y))
         target.resizable(False, False)
-
-
 
 
 def app():

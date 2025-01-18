@@ -5,12 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4223b0cb-600c-4d4d-bb0c-1363f4ef671e" name="Changes" comment="Updating progress">
-      <change afterPath="$PROJECT_DIR$/ProjectWriteUp/Analysis - chapter 1.docx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ProjectWriteUp/Design - chapter 2.docx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ProjectWriteUp/Marking Grid.dotx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ProjectWriteUp/NEW Development and Testing .docx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ProjectWriteUp/NEW Evaluation.docx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LoginScreen.py" beforeDir="false" afterPath="$PROJECT_DIR$/LoginScreen.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MyDatabase.py" beforeDir="false" afterPath="$PROJECT_DIR$/MyDatabase.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MyExpenseWindow.py" beforeDir="false" afterPath="$PROJECT_DIR$/MyExpenseWindow.py" afterDir="false" />
@@ -753,47 +749,12 @@
       <workItem from="1736443383504" duration="1837000" />
       <workItem from="1736457442415" duration="2004000" />
       <workItem from="1736459559013" duration="5701000" />
-      <workItem from="1736498904047" duration="5177000" />
-    </task>
-    <task id="LOCAL-00003" summary="modified my_message_boxes">
-      <option name="closed" value="true" />
-      <created>1714580114626</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1714580114626</updated>
-    </task>
-    <task id="LOCAL-00004" summary="modified my_message_boxes">
-      <option name="closed" value="true" />
-      <created>1714580327921</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1714580327921</updated>
-    </task>
-    <task id="LOCAL-00005" summary="updated code, created myCustomMessages.py using CTk">
-      <option name="closed" value="true" />
-      <created>1714647529281</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1714647529281</updated>
-    </task>
-    <task id="LOCAL-00006" summary="updated validator">
-      <option name="closed" value="true" />
-      <created>1714661814721</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1714661814721</updated>
-    </task>
-    <task id="LOCAL-00007" summary="updated validator">
-      <option name="closed" value="true" />
-      <created>1714662051282</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1714662051282</updated>
+      <workItem from="1736498904047" duration="5430000" />
+      <workItem from="1736513940839" duration="3844000" />
+      <workItem from="1736518383109" duration="575000" />
+      <workItem from="1736519437133" duration="1235000" />
+      <workItem from="1737114254164" duration="9083000" />
+      <workItem from="1737195069820" duration="6681000" />
     </task>
     <task id="LOCAL-00008" summary="created password strength checker in validator">
       <option name="closed" value="true" />
@@ -1147,7 +1108,47 @@
       <option name="project" value="LOCAL" />
       <updated>1736338606741</updated>
     </task>
-    <option name="localTasksCounter" value="52" />
+    <task id="LOCAL-00052" summary="Added write up to code">
+      <option name="closed" value="true" />
+      <created>1736504217395</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1736504217395</updated>
+    </task>
+    <task id="LOCAL-00053" summary="Removed tk bar, moved into MyExpenseWindow.py now with option to log out">
+      <option name="closed" value="true" />
+      <created>1736504266365</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1736504266365</updated>
+    </task>
+    <task id="LOCAL-00054" summary="Updated database tab, need to finish 'add_data' and 'wipe_database'">
+      <option name="closed" value="true" />
+      <created>1736504305646</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1736504305646</updated>
+    </task>
+    <task id="LOCAL-00055" summary="Updated database to be able to import data from excel file">
+      <option name="closed" value="true" />
+      <created>1736504328297</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1736504328297</updated>
+    </task>
+    <task id="LOCAL-00056" summary="Updating progress">
+      <option name="closed" value="true" />
+      <created>1736504337253</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1736504337253</updated>
+    </task>
+    <option name="localTasksCounter" value="57" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1183,10 +1184,6 @@
     <ignored-roots>
       <path value="$PROJECT_DIR$/MyProject" />
     </ignored-roots>
-    <MESSAGE value="updated project tester" />
-    <MESSAGE value="saving current changes, and starting MyAccountsDatabase.py" />
-    <MESSAGE value="saving current changes" />
-    <MESSAGE value="saving current progress" />
     <MESSAGE value="Created two-factor authentication" />
     <MESSAGE value="Created new folder for project images, added some new images" />
     <MESSAGE value="Updated database to be able to retrieve data from a specific user or every user" />
@@ -1207,23 +1204,27 @@
     <MESSAGE value="Finished accounts tab, need to complete extras tab" />
     <MESSAGE value="Finished expense_vs_income window and currency_converter window in budgeting tab. Need to finish rest of budgeting tab and testing tab" />
     <MESSAGE value="Removed unnecessary text, need to add comments later" />
+    <MESSAGE value="Added write up to code" />
+    <MESSAGE value="Removed tk bar, moved into MyExpenseWindow.py now with option to log out" />
+    <MESSAGE value="Updated database tab, need to finish 'add_data' and 'wipe_database'" />
+    <MESSAGE value="Updated database to be able to import data from excel file" />
     <MESSAGE value="Updating progress" />
     <option name="LAST_COMMIT_MESSAGE" value="Updating progress" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/MyProject$MyMessageBoxes.coverage" NAME="MyMessageBoxes Coverage Results" MODIFIED="1735491850366" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/MyProject$MyAccountsDatabase.coverage" NAME="MyAccountsDatabase Coverage Results" MODIFIED="1721296196057" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MyProject$MyDatabase.coverage" NAME="MyDatabase Coverage Results" MODIFIED="1736370099136" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MyProject$MyAccountsDatabase.coverage" NAME="MyAccountsDatabase Coverage Results" MODIFIED="1721296196057" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MyProject$ctkmessagebox.coverage" NAME="ctkmessagebox Coverage Results" MODIFIED="1730290129783" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/venv/Lib/site-packages/CTkMessagebox" />
-    <SUITE FILE_PATH="coverage/MyProject$LoginScreen.coverage" NAME="LoginScreen Coverage Results" MODIFIED="1735038031161" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/MyProject$MyExpenseWindow.coverage" NAME="MyExpenseWindow Coverage Results" MODIFIED="1736503205788" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MyProject$LoginScreen.coverage" NAME="LoginScreen Coverage Results" MODIFIED="1737200913204" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MyProject$MyExpenseWindow.coverage" NAME="MyExpenseWindow Coverage Results" MODIFIED="1737202098101" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MyProject$.coverage" NAME=" Coverage Results" MODIFIED="1718014623098" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MyProject$test.coverage" NAME="test Coverage Results" MODIFIED="1730288200908" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MyProject$PasswordHasher.coverage" NAME="PasswordHasher Coverage Results" MODIFIED="1731246795743" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MyProject$CreateAccountScreen.coverage" NAME="CreateAccountScreen Coverage Results" MODIFIED="1735412792786" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MyProject$MainExpenseWindow.coverage" NAME="MainExpenseWindow Coverage Results" MODIFIED="1726158475038" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MyProject$MyCustomFunctions.coverage" NAME="MyCustomFunctions Coverage Results" MODIFIED="1730375649897" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/MyProject$Main.coverage" NAME="Main Coverage Results" MODIFIED="1735244896071" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MyProject$Main.coverage" NAME="Main Coverage Results" MODIFIED="1737200065163" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MyProject$main.coverage" NAME="main Coverage Results" MODIFIED="1717834806337" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MyProject$StartingInterface.coverage" NAME="StartingInterface Coverage Results" MODIFIED="1717833117224" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MyProject$MyValidator.coverage" NAME="MyValidator Coverage Results" MODIFIED="1731254641092" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

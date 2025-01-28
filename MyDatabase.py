@@ -487,7 +487,6 @@ class AccountsDatabase:
             self.main_db.commit()
             cursor.close()
             MyMessageBoxes.ShowMessage().show_info("Database successfully wiped.")
-            return True
         except Exception as error:
             MyMessageBoxes.ShowMessage.show_info(f"Error wiping database: {error}")
 
@@ -755,7 +754,7 @@ class DisplayExcelSpreadsheet:
             # Save the workbook
             workbook.save(file_path)
         else:
-            raise Exception("No expenses found for your user from the year chosen.")
+            return "No expenses found for your user from the year chosen."
 
 
 class ExpenseEditor:

@@ -24,8 +24,9 @@ import matplotlib.pyplot as plt
 import requests
 from decimal import Decimal
 import subprocess
-
 import PasswordHasher
+import os
+import sys
 
 
 class DefaultWindow:
@@ -797,6 +798,12 @@ class DefaultWindow:
         # Display the initial empty graph
         fetch_and_predict_expenses()
 
+    def get_path(self, filename):
+        if hasattr(sys, "_MEIPASS"):
+            return os.path.join(sys._MEIPASS, filename)
+        else:
+            return filename
+
 
 class AdminWindow(DefaultWindow):
     def __init__(self, parent, current_user, current_tab=None):
@@ -815,22 +822,22 @@ class AdminWindow(DefaultWindow):
     def create_accounts_tab(self):
         accounts_tab = self.nb.tab("Accounts")
 
-        add_user_image_path = "ProjectImages/AddUserImage.png"
+        add_user_image_path = self.get_path("ProjectImages/AddUserImage.png")
         add_user_image = Image.open(add_user_image_path)
         add_user_image = add_user_image.resize((60, 60))  # Resize to fit button
         add_user_image = ctk.CTkImage(light_image=add_user_image, size=(80, 75))
 
-        remove_user_image_path = "ProjectImages/RemoveUserImage.png"
+        remove_user_image_path = self.get_path("ProjectImages/RemoveUserImage.png")
         remove_user_image = Image.open(remove_user_image_path)
         remove_user_image = remove_user_image.resize((60, 60))
         remove_user_image = ctk.CTkImage(light_image=remove_user_image, size=(80, 75))
 
-        edit_user_image_path = "ProjectImages/EditUserImage.png"
+        edit_user_image_path = self.get_path("ProjectImages/EditUserImage.png")
         edit_user_image = Image.open(edit_user_image_path)
         edit_user_image = edit_user_image.resize((60, 60))
         edit_user_image = ctk.CTkImage(light_image=edit_user_image, size=(80, 75))
 
-        view_users_image_path = "ProjectImages/ViewUsersImage.png"
+        view_users_image_path = self.get_path("ProjectImages/ViewUsersImage.png")
         view_users_image = Image.open(view_users_image_path)
         view_users_image = view_users_image.resize((60, 60))
         view_users_image = ctk.CTkImage(light_image=view_users_image, size=(80, 75))
@@ -1569,7 +1576,8 @@ class AdminWindow(DefaultWindow):
                                                        given_password):
                 show_hide_window.withdraw()
                 confirm_dp_wipe = MyMessageBoxes.ShowMessage().ask_question("Are you sure you want to wipe the"
-                                                                            " database?", "Yes", "No",
+                                                                            " database? Every Expense and User will be"
+                                                                            "removed?", "Yes", "No",
                                                                             "Back", "Back")
                 if confirm_dp_wipe == "Back":
                     show_hide_window.deiconify()
@@ -1579,9 +1587,12 @@ class AdminWindow(DefaultWindow):
                     MyDatabase.DisplayExcelSpreadsheet(self.current_user, ctk.CTk()).download_expenses()
                     MyDatabase.DisplayExcelSpreadsheet(self.current_user, ctk.CTk(),
                                                        show_users=True).download_expenses()
-                    MyMessageBoxes.ShowMessage().show_info(f"Downloaded current database, wiping now.")
+                    MyMessageBoxes.ShowMessage().show_info(f"Downloaded current database if not empty, the database"
+                                                           f"will be wiped and the app will be closed.")
                     self.main_db.wipe_database()
-                    self.show_main_window()
+                    quit()
+            else:
+                MyMessageBoxes.ShowMessage().show_error("Incorrect password.")
         except Exception as e:
             return e
 
@@ -1596,3 +1607,4 @@ if __name__ == '__main__':
     account_frame = (AdminWindow
                      (root, "CM0000"))
     root.mainloop()
+

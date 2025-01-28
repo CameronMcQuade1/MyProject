@@ -1,5 +1,7 @@
 from PIL import Image
 import customtkinter as ctk
+import os
+import sys
 
 
 class EntryPlaceHolderText:
@@ -40,12 +42,12 @@ class ShowHidePasswordText:
 
 class ShowHidePasswordWidget:
     def __init__(self, parent, target, place_x, place_y):
-        password_hidden_image_path = "ProjectImages/PasswordHiddenImage.png"
+        password_hidden_image_path = self.get_path("ProjectImages/PasswordHiddenImage.png")
         password_hidden_image = Image.open(password_hidden_image_path)
         password_hidden_image = password_hidden_image.resize((20, 20))  # Resize to fit button
         password_hidden_image = ctk.CTkImage(light_image=password_hidden_image, size=(20, 20))
         # Image which is shown when the password is shown
-        password_shown_image_path = "ProjectImages/PasswordShownImage.png"
+        password_shown_image_path = self.get_path("ProjectImages/PasswordShownImage.png")
         password_shown_image = Image.open(password_shown_image_path)
         password_shown_image = password_shown_image.resize((20, 20))  # Resize to fit button
         password_shown_image = ctk.CTkImage(light_image=password_shown_image, size=(20, 20))
@@ -65,3 +67,9 @@ class ShowHidePasswordWidget:
         target.bind("<Button-1>", lambda event: target.configure(
             show='*') if self.show_hide_password.cget('image') == password_hidden_image else
             target.configure(show=''))
+
+    def get_path(self, filename):
+        if hasattr(sys, "_MEIPASS"):
+            return os.path.join(sys._MEIPASS, filename)
+        else:
+            return filename

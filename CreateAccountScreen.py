@@ -1,7 +1,7 @@
 import customtkinter as ctk
 import LoginScreen
-import MyExpenseWindow
 import MyCustomFunctions
+import MyExpenseWindow
 import MyDatabase
 import MyMessageBoxes
 import MyValidator
@@ -104,6 +104,8 @@ class CreateAccount:
         self.frames[index].pack(expand=True, fill="both")
 
     def exit_button_return(self):
+        if MyDatabase.AccountsDatabase().return_account_amount() == 0:
+            quit()
         self.create_account_screen.destroy()
         self.parent.geometry('850x525+425+175')
         if self.current_user:

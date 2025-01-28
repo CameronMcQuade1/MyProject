@@ -3,7 +3,6 @@ import MyMessageBoxes
 import LoginScreen
 import CreateAccountScreen
 import customtkinter as ctk
-import tkinter as tk
 
 
 class MainApp:
@@ -21,7 +20,7 @@ class MainApp:
         if MyDatabase.AccountsDatabase().return_account_amount() == 0:
             msg = MyMessageBoxes.ShowMessage.show_warning("No accounts detected.\n You will need to make an account.")
             if msg == "Cancel":
-                exit()
+                quit()
             elif msg == "Okay":
                 self.root.geometry("325x175+750+250")
                 CreateAccountScreen.CreateAccount(self.root)
@@ -37,7 +36,7 @@ class MainApp:
     def centre_window(target, width, height):
         screen_width = target.winfo_screenwidth()
         screen_height = target.winfo_screenheight()
-        centre_x = (screen_height / 2) - (width / 2)
+        centre_x = (screen_width / 2) - (width / 2)
         centre_y = (screen_height / 2) - (height / 2)
         target.geometry('%dx%d+%d+%d' % (width, height, centre_x, centre_y))
         target.resizable(False, False)
